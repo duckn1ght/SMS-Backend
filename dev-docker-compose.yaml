@@ -1,0 +1,15 @@
+services:
+    postgres:
+        container_name: postgres-sms
+        image: postgres:latest
+        env_file:
+            - .env
+        ports:
+            - "${POSTGRES_PORT:-5432}:5432"
+    redis:
+        container_name: redis-sms
+        image: redis:latest
+        env_file:
+            - .env
+        ports:
+            - "${REDIS_PORT:-6379}:6379"

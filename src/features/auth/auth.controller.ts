@@ -1,0 +1,31 @@
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { RegDto } from './dto/reg.dto';
+import { AuthDto } from './dto/auth.dto';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import type { JwtReq } from './types/jwtReq.type';
+import { JwtUniversalGuard } from './guards/universal.guard';
+
+@Controller('auth')
+@ApiTags('Авторизация и Регистрация')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('login')
+  async auth(@Body() dto: AuthDto) {
+    return this.authService.auth(dto);
+  }
+
+  @Post('register')
+  @ApiBody({ type: RegDto })
+  async register(@Body() dto: RegDto) {
+    return this.authService.registration(dto);
+  }
+
+  @ApiBearerAuth()
+  @Get('me')
+  @UseGuards(JwtUniversalGuard)
+  async me(@Req() r: JwtReq) {
+    return this.authService.me(r.user.id);
+  }
+}
