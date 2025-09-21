@@ -14,6 +14,7 @@ import { BlackListModule } from './features/blacklist/blacklist.module';
 import { WhiteListModule } from './features/whitelist/whitelist.module';
 import { PhoneModule } from './features/phone/phone.module';
 import { ReportModule } from './features/report/report.module';
+import { LogsModule } from './features/logs/logs.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ReportModule } from './features/report/report.module';
     BlackListModule,
     PhoneModule,
     ReportModule,
+    LogsModule,
   ],
   controllers: [AppController],
 })
