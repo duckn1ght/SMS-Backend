@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BlackListService } from './blacklist.service';
-import { BlackListController } from './blacklist.controller';
+import { BlacklistController } from './blacklist.controller';
+import { BlacklistService } from './blacklist.service';
+import { Blacklist } from './entities/blacklist.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  controllers: [BlackListController],
-  providers: [BlackListService],
+  imports: [TypeOrmModule.forFeature([Blacklist])],
+  controllers: [BlacklistController],
+  providers: [BlacklistService],
 })
-export class BlackListModule {}
+export class BlacklistModule {}

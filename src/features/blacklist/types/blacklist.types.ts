@@ -1,4 +1,4 @@
-export interface BLACKLIST_STATUS {
-  ACCEPTED: 'accepted';
-  REVIEW: 'review';
+export enum BLACKLIST_STATUS {
+  ACCEPTED = 'accepted',
+  REVIEW = 'review',
 }

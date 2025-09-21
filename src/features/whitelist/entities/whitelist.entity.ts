@@ -1,4 +1,4 @@
-import { BLACKLIST_STATUS } from 'src/features/blacklist/types/blacklist.types';
+import { AbstractEntity } from 'src/database/abstract.entity';
 import { User } from 'src/features/user/entities/user.entity';
 import {
   Entity,
@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Whitelist {
+export class Whitelist extends AbstractEntity<Whitelist> {
   /** Тот, кто создал запись номера в ЧС */
   @ManyToOne(() => User, (user) => user.createdBlacklist)
   @JoinColumn({ name: 'created_user' })

@@ -1,0 +1,45 @@
+# Исключаем node_modules - они будут установлены в контейнере
+node_modules
+npm-debug.log*
+
+# Исключаем собранные файлы - они будут созданы в контейнере
+dist
+build
+
+# Исключаем файлы разработки
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose*.yaml
+dev-docker-compose.yaml
+prod-docker-compose.yaml
+
+# Исключаем переменные окружения
+.env
+.env.local
+.env.development
+.env.production
+
+# Исключаем файлы тестов и покрытия
+coverage
+*.log
+test
+
+# Исключаем временные файлы
+.tmp
+.temp
+
+# Исключаем IDE файлы
+.vscode
+.idea
+*.swp
+*.swo
+
+# Исключаем OS файлы
+.DS_Store
+Thumbs.db
+
+# Исключаем README и документацию
+README.md
+*.md
