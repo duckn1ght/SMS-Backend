@@ -13,10 +13,11 @@ import {
 @Entity('reports')
 export class Report extends AbstractEntity<Report> {
   @ManyToOne(() => Blacklist, (b) => b.reports)
+  @JoinColumn({ name: 'blacklist_id' })
   blacklist: Blacklist;
 
   @ManyToOne(() => User, (u) => u.createdReports)
-  @JoinColumn({ name: 'created_user' })
+  @JoinColumn({ name: 'created_user_id' })
   createdUser: User;
 
   @Column({ nullable: true })

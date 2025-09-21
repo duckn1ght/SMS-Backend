@@ -16,7 +16,7 @@ import { Report } from 'src/features/report/entities/report.entity';
 export class Blacklist extends AbstractEntity<Blacklist> {
   /** Тот, кто создал запись номера в ЧС */
   @ManyToOne(() => User, (user) => user.createdBlacklist)
-  @JoinColumn({ name: 'created_user' })
+  @JoinColumn({ name: 'created_user_id' })
   createdUser: User;
 
   @Column()
