@@ -10,7 +10,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { AuthModule } from './features/auth/auth.module';
 import { ProfileModule } from './features/profile/profile.module';
 import { AdminModule } from './features/admin/admin.module';
-import { BlackListModule } from './features/blacklist/blacklist.module';
+import { BlacklistModule } from './features/blacklist/blacklist.module';
 import { WhiteListModule } from './features/whitelist/whitelist.module';
 import { PhoneModule } from './features/phone/phone.module';
 import { ReportModule } from './features/report/report.module';
@@ -37,7 +37,7 @@ import { LogsModule } from './features/logs/logs.module';
     ProfileModule,
     AdminModule,
     WhiteListModule,
-    BlackListModule,
+    BlacklistModule,
     PhoneModule,
     ReportModule,
     LogsModule,

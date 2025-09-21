@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { USER_ROLE } from '../user/types/user.types';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -22,10 +21,10 @@ export class AdminController {
     return this.adminService.createUser(dto);
   }
 
-  /** 
+  /**
    * Проверяет, является ли указанная роль админской.
-   * 
-   * Если роль не админская, то возвращает result = false и объект return для сообщения. 
+   *
+   * Если роль не админская, то возвращает result = false и объект return для сообщения.
    * Если роль админская, то result = true.
    */
   #isNotAdmin(role: string) {

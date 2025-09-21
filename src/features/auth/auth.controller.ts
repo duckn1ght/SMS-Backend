@@ -4,7 +4,7 @@ import { RegDto } from './dto/reg.dto';
 import { AuthDto } from './dto/auth.dto';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import type { JwtReq } from './types/jwtReq.type';
-import { JwtUniversalGuard } from './guards/universal.guard';
+import { UniversalJwtGuard } from './guards/universal.guard';
 
 @Controller('auth')
 @ApiTags('Авторизация и Регистрация')
@@ -24,7 +24,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Get('me')
-  @UseGuards(JwtUniversalGuard)
+  @UseGuards(UniversalJwtGuard)
   async me(@Req() r: JwtReq) {
     return this.authService.me(r.user.id);
   }
