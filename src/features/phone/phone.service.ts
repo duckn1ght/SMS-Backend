@@ -4,6 +4,7 @@ import { Whitelist } from '../whitelist/entities/whitelist.entity';
 import { Blacklist } from '../blacklist/entities/blacklist.entity';
 import { Repository } from 'typeorm';
 import { BLACKLIST_SELECT, WHITELIST_SELECT } from 'src/const/selects';
+import { Report } from '../report/entities/report.entity';
 
 @Injectable()
 export class PhoneService {
@@ -12,6 +13,8 @@ export class PhoneService {
     private whitelistRep: Repository<Whitelist>,
     @InjectRepository(Blacklist)
     private blacklistRep: Repository<Blacklist>,
+    @InjectRepository(Report)
+    private reportRep: Repository<Report>,
   ) {}
 
   async phoneCheck(phone: string) {
@@ -25,7 +28,11 @@ export class PhoneService {
       where: { phone },
       select: BLACKLIST_SELECT,
     });
-    if (inBlacklist) return { status: 'blacklist', data: inBlacklist };
+    const reportCount = await this.reportRep.count({
+      where: { blacklist: { phone } },
+    });
+    if (inBlacklist)
+      return { status: 'blacklist', reportCount, data: inBlacklist };
 
     return { status: 'Номера нет в базе данных', code: 200 };
   }

@@ -1,4 +1,9 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateWhitelistDto } from './create-whitelist.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class UpdateWhitelistDto extends PartialType(CreateWhitelistDto) {}
+export class UpdateWhitelistDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  comment?: string;
+}

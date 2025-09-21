@@ -6,12 +6,15 @@ import { WHITELIST_SELECT } from 'src/const/selects';
 import { CreateWhitelistDto } from './dto/create-whitelist.dto';
 import { UpdateWhitelistDto } from './dto/update-whitelist.dto';
 import { User } from '../user/entities/user.entity';
+import { Blacklist } from '../blacklist/entities/blacklist.entity';
 
 @Injectable()
 export class WhitelistService {
   constructor(
     @InjectRepository(Whitelist)
     private whitelistRep: Repository<Whitelist>,
+    @InjectRepository(Blacklist)
+    private blacklistRep: Repository<Blacklist>,
     @InjectRepository(User)
     private userRep: Repository<User>,
   ) {}
@@ -19,11 +22,20 @@ export class WhitelistService {
   async create(dto: CreateWhitelistDto, userId: string) {
     const existedUser = await this.userRep.findOne({ where: { id: userId } });
     if (!existedUser) throw new HttpException('Пользователь не найден', 404);
+    const [existed, blackExisted] = await Promise.all([
+      this.whitelistRep.findOne({ where: { phone: dto.phone } }),
+      this.blacklistRep.findOne({ where: { phone: dto.phone } }),
+    ]);
+    if (existed)
+      return { code: 400, message: 'Этот номер уже существует в белом списке' };
+    if (blackExisted)
+      return { code: 400, message: 'Этот номер существует в черном списке' };
 
-    return await this.whitelistRep.save({
+    await this.whitelistRep.save({
       createdUser: existedUser,
       ...dto,
     });
+    return { code: 201, message: 'Номер успешно добавлен в Белый Список' };
   }
 
   async get() {
@@ -47,11 +59,12 @@ export class WhitelistService {
   }
 
   async update(dto: UpdateWhitelistDto, id: string) {
-    return await this.whitelistRep.update(id, dto);
+    await this.whitelistRep.update(id, dto);
+    return { code: 200, message: 'Запись успешно обновлена' };
   }
 
   async delete(id: string) {
     await this.whitelistRep.delete(id);
-    return { code: 200, message: 'Запись успешно удалена' };
+    return { code: 204, message: 'Запись успешно удалена' };
   }
 }

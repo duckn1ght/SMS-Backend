@@ -7,12 +7,16 @@ import { CreateBlacklistDto } from './dto/create-blacklist.dto';
 import { User } from '../user/entities/user.entity';
 import { UpdateBlacklistDto } from './dto/update-blacklist.dto';
 import { CatchErrors } from 'src/const/check.decorator';
+import { BLACKLIST_STATUS } from './types/blacklist.types';
+import { Whitelist } from '../whitelist/entities/whitelist.entity';
 
 @Injectable()
 export class BlacklistService {
   constructor(
     @InjectRepository(Blacklist)
     private readonly blacklistRep: Repository<Blacklist>,
+    @InjectRepository(Whitelist)
+    private readonly whitelistRep: Repository<Whitelist>,
     @InjectRepository(User)
     private readonly userRep: Repository<User>,
   ) {}
@@ -20,20 +24,24 @@ export class BlacklistService {
   async create(dto: CreateBlacklistDto, userId: string) {
     const user = await this.userRep.findOne({ where: { id: userId } });
     if (!user) throw new HttpException('Пользователь не найден', 404);
-    const existed = await this.blacklistRep.findOne({
-      where: { phone: dto.phone },
-    });
-    if (existed) throw new HttpException('Этот номер уже в черном списке', 400);
-    return await this.blacklistRep.save({
+    const [existed, whiteExisted] = await Promise.all([
+      this.blacklistRep.findOne({ where: { phone: dto.phone } }),
+      this.whitelistRep.findOne({ where: { phone: dto.phone } }),
+    ]);
+    if (existed) throw new HttpException('Этот номер уже в Черном Списке', 400);
+    if (whiteExisted) throw new HttpException('Этот номер в Белом Списке', 400);
+    await this.blacklistRep.save({
       phone: dto.phone,
       comment: dto.comment,
       createdUser: user,
+      status: BLACKLIST_STATUS.REVIEW,
     });
+    return { code: 201, message: 'Номер успешно добавлен в Черный Список' };
   }
 
   async get() {
     return await this.blacklistRep.find({
-      relations: { createdUser: true },
+      relations: { createdUser: true, reports: true },
       select: BLACKLIST_SELECT,
     });
   }
@@ -41,7 +49,7 @@ export class BlacklistService {
   async getOneByNumber(phone: string) {
     return await this.blacklistRep.findOne({
       where: { phone },
-      relations: { createdUser: true },
+      relations: { createdUser: true, reports: true },
       select: BLACKLIST_SELECT,
     });
   }
@@ -49,7 +57,7 @@ export class BlacklistService {
   async getOneById(id: string) {
     return await this.blacklistRep.findOne({
       where: { id },
-      relations: { createdUser: true },
+      relations: { createdUser: true, reports: true },
       select: BLACKLIST_SELECT,
     });
   }
@@ -58,12 +66,12 @@ export class BlacklistService {
     const entry = await this.blacklistRep.findOne({ where: { id } });
     if (!entry) throw new HttpException('Запись не найдена', 404);
     await this.blacklistRep.update(id, dto);
-    return await this.blacklistRep.findOne({ where: { id } });
+    return { code: 200, message: 'Запись успешно обновлена' };
   }
 
   @CatchErrors()
   async delete(id: string) {
     await this.blacklistRep.delete(id);
-    return { code: 200, message: 'Запись успешно удалена' };
+    return { code: 204, message: 'Запись успешно удалена' };
   }
 }

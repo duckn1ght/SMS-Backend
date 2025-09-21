@@ -9,46 +9,56 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { WhitelistService } from './whitelist.service';
 import { CreateWhitelistDto } from './dto/create-whitelist.dto';
 import { UpdateWhitelistDto } from './dto/update-whitelist.dto';
 import type { JwtReq } from '../auth/types/jwtReq.type';
+import { UniversalJwtGuard } from '../auth/guards/universal.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { WebJwtGuard } from '../auth/guards/web.guard';
 
 @Controller('whitelist')
+@ApiBearerAuth()
+@ApiTags('Белый список')
 export class WhitelistController {
   constructor(private readonly whitelistService: WhitelistService) {}
 
   @Post()
+  @UseGuards(WebJwtGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateWhitelistDto, @Req() req: JwtReq) {
     return this.whitelistService.create(dto, req.user.id);
   }
 
   @Get()
+  @UseGuards(UniversalJwtGuard)
   async get() {
     return this.whitelistService.get();
   }
 
   @Get('by-phone/:phone')
+  @UseGuards(UniversalJwtGuard)
   async getOneByNumber(@Param('phone') phone: string) {
     return this.whitelistService.getOneByNumber(phone);
   }
 
   @Get(':id')
+  @UseGuards(UniversalJwtGuard)
   async getOneById(@Param('id') id: string) {
     return this.whitelistService.getOneById(id);
   }
 
   @Patch(':id')
+  @UseGuards(WebJwtGuard)
   async update(@Body() dto: UpdateWhitelistDto, @Param('id') id: string) {
-    return this.whitelistService.update(dto, id);
+    return await this.whitelistService.update(dto, id);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(WebJwtGuard)
   async delete(@Param('id') id: string) {
-    await this.whitelistService.delete(id);
-    return;
+    return await this.whitelistService.delete(id);
   }
 }

@@ -4,9 +4,10 @@ import { WhitelistController } from './whitelist.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Whitelist } from './entities/whitelist.entity';
 import { User } from '../user/entities/user.entity';
+import { Blacklist } from '../blacklist/entities/blacklist.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Whitelist, User])],
+  imports: [TypeOrmModule.forFeature([Whitelist, User, Blacklist])],
   controllers: [WhitelistController],
   providers: [WhitelistService],
 })

@@ -1,4 +1,15 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateWhitelistDto } from 'src/features/whitelist/dto/create-whitelist.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { BLACKLIST_STATUS } from '../types/blacklist.types';
 
-export class UpdateBlacklistDto extends PartialType(CreateWhitelistDto) {}
+export class UpdateBlacklistDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  comment?: string;
+
+  @IsEnum(BLACKLIST_STATUS)
+  @IsOptional()
+  @ApiProperty()
+  status?: BLACKLIST_STATUS;
+}
