@@ -1,56 +1,24 @@
-# Используем официальный Node.js образ с Alpine Linux для минимального размера
-FROM node:18-alpine AS base
-
-# Устанавливаем рабочую директорию
-WORKDIR /app
-
-# Копируем файлы зависимостей
-COPY package*.json ./
-
-# Устанавливаем зависимости
-RUN npm ci --only=production && npm cache clean --force
-
-# Стадия разработки и сборки
-FROM node:18-alpine AS builder
+# backend
+FROM node:22-alpine
 
 WORKDIR /app
 
-# Копируем файлы зависимостей
-COPY package*.json ./
+# Копируем package.json и yarn.lock для установки зависимостей
+COPY ./package.json ./yarn.lock ./
 
-# Устанавливаем все зависимости (включая dev)
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
-# Копируем исходный код
+# Копируем остальные файлы проекта
 COPY . .
 
-# Собираем приложение
-RUN npm run build
+RUN chmod +x ./wait-for-it.sh
 
-# Финальная стадия - продакшен образ
-FROM node:18-alpine AS production
+RUN apk add --no-cache bash netcat-openbsd
 
-# Создаем пользователя для безопасности
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+RUN yarn build
 
-WORKDIR /app
+ENV POSTGRES_HOST=postgres
 
-# Копируем production зависимости из base стадии
-COPY --from=base /app/node_modules ./node_modules
-
-# Копируем собранное приложение
-COPY --from=builder /app/dist ./dist
-
-# Копируем package.json для метаинформации
-COPY package*.json ./
-
-# Меняем владельца файлов на созданного пользователя
-RUN chown -R nestjs:nodejs /app
-USER nestjs
-
-# Открываем порт
 EXPOSE 3000
 
-# Команда запуска приложения
-CMD ["node", "dist/main.js"]
+CMD ["bash", "-c", "./wait-for-it.sh postgres:5432 -- yarn start:prod"]
