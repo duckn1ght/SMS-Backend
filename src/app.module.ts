@@ -15,6 +15,7 @@ import { WhiteListModule } from './features/whitelist/whitelist.module';
 import { PhoneModule } from './features/phone/phone.module';
 import { ReportModule } from './features/report/report.module';
 import { LogsModule } from './features/logs/logs.module';
+import { AppealModule } from './features/appeal/appeal.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LogsModule } from './features/logs/logs.module';
     PhoneModule,
     ReportModule,
     LogsModule,
+    AppealModule,
   ],
   controllers: [AppController],
 })

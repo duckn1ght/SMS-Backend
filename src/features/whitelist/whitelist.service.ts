@@ -26,36 +26,23 @@ export class WhitelistService {
       this.whitelistRep.findOne({ where: { phone: dto.phone } }),
       this.blacklistRep.findOne({ where: { phone: dto.phone } }),
     ]);
-    if (existed)
-      return { code: 400, message: 'Этот номер уже существует в белом списке' };
-    if (blackExisted)
-      return { code: 400, message: 'Этот номер существует в черном списке' };
+    if (existed) return { code: 400, message: 'Этот номер уже существует в белом списке' };
+    if (blackExisted) return { code: 400, message: 'Этот номер существует в черном списке' };
 
-    await this.whitelistRep.save({
-      createdUser: existedUser,
-      ...dto,
-    });
+    await this.whitelistRep.save({ createdUser: existedUser, ...dto });
     return { code: 201, message: 'Номер успешно добавлен в Белый Список' };
   }
 
   async get() {
-    return await this.whitelistRep.find({
-      select: WHITELIST_SELECT,
-    });
+    return await this.whitelistRep.find({ select: WHITELIST_SELECT });
   }
 
   async getOneByNumber(phone: string) {
-    return await this.whitelistRep.findOne({
-      where: { phone },
-      select: WHITELIST_SELECT,
-    });
+    return await this.whitelistRep.findOne({ where: { phone }, select: WHITELIST_SELECT });
   }
 
   async getOneById(id: string) {
-    return await this.whitelistRep.findOne({
-      where: { id },
-      select: WHITELIST_SELECT,
-    });
+    return await this.whitelistRep.findOne({ where: { id }, select: WHITELIST_SELECT });
   }
 
   async update(dto: UpdateWhitelistDto, id: string) {
