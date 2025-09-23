@@ -17,8 +17,9 @@ RUN apk add --no-cache bash netcat-openbsd
 
 RUN yarn build
 
-ENV POSTGRES_HOST=postgres
+ENV POSTGRES_HOST='postgres'
 
 EXPOSE 3000
 
-CMD ["bash", "-c", "./wait-for-it.sh postgres:5432 -- yarn start:prod"]
+# CMD ["bash", "-c", "./wait-for-it.sh sms-backend-postgres-1:5432 -- yarn start:prod"]
+CMD yarn start:prod
