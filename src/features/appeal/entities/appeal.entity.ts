@@ -49,10 +49,10 @@ export class Appeal extends AbstractEntity<Appeal> {
   fio?: string;
 
   @Column({ nullable: true })
-  userPhone: string;
+  userPhone?: string;
 
   @Column({ nullable: true })
-  region: string;
+  region?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

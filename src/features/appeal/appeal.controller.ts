@@ -7,6 +7,7 @@ import { AndroidJwtGuard } from '../auth/guards/android.guard';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import { UniversalJwtGuard } from '../auth/guards/universal.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
+import { UpdateAppealDto } from './dto/update-appeal.dto';
 
 @Controller('appeal')
 @ApiTags('Обращения')
@@ -16,8 +17,8 @@ export class AppealController {
 
   @Post()
   @UseGuards(AndroidJwtGuard)
-  create(@Body() dto: CreateAppealDto) {
-    return this.appealService.create(dto);
+  create(@Body() dto: CreateAppealDto, @Req() r: JwtReq) {
+    return this.appealService.create(dto, r.user.id);
   }
 
   @Get()
@@ -48,6 +49,12 @@ export class AppealController {
   @UseGuards(AndroidJwtGuard)
   remove(@Param('id') id: string) {
     return this.appealService.remove(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(AndroidJwtGuard)
+  update(@Param('id') id: string, @Body() dto: UpdateAppealDto) {
+    return this.appealService.update(id, dto);
   }
 
   @Patch(':id/status')

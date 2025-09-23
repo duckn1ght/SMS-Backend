@@ -52,4 +52,24 @@ export class CreateAppealDto {
   @ApiProperty()
   @IsOptional()
   type?: APPEAL_TYPE;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  iin?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  fio?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  userPhone?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  region?: string;
 }

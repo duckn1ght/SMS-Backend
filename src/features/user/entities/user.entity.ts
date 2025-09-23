@@ -23,6 +23,12 @@ export class User extends AbstractEntity<User> {
   @Column({ nullable: true })
   name?: string;
 
+  @Column({ nullable: true })
+  position?: string;
+
+  @Column({ nullable: true })
+  organization?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
