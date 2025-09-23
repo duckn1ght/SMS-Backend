@@ -1,20 +1,55 @@
-import { IsEnum, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { APPEAL_TYPE } from '../types/appeal.type';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAppealDto {
   @IsPhoneNumber()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
-  phone: string;
+  phone?: string;
 
-  @IsString()
   @ApiProperty()
-  @IsNotEmpty()
-  text: string;
+  @IsString()
+  @IsOptional()
+  sum?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  who?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  howSendMoneny?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  location?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  communicationMethod?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  when?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  helpAsk?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  details?: string;
 
   @IsEnum(APPEAL_TYPE)
   @ApiProperty()
-  @IsNotEmpty()
-  type: APPEAL_TYPE;
+  @IsOptional()
+  type?: APPEAL_TYPE;
 }

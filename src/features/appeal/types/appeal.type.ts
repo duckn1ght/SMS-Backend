@@ -8,4 +8,5 @@ export enum APPEAL_STATUS {
   NEW = 'new',
   IN_PROCESS = 'inProcess',
   DONE = 'done',
+  BLOCKED = 'blocked',
 }

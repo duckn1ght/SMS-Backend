@@ -35,16 +35,15 @@ export class AppealController {
   @Get('user/:userId')
   @UseGuards(WebJwtGuard)
   findAllByUser(@Param('userId') userId: string) {
-    return this.appealService.findAllByPhone(userId);
+    return this.appealService.findAllByUser(userId);
   }
 
   @Get('my')
   @UseGuards(WebJwtGuard)
   findMy(@Req() r: JwtReq) {
-    return this.appealService.findAllByPhone(r.user.id);
+    return this.appealService.findAllByUser(r.user.id);
   }
 
-  /** Удалить обращение */
   @Delete(':id')
   @UseGuards(AndroidJwtGuard)
   remove(@Param('id') id: string) {

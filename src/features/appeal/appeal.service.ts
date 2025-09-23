@@ -12,34 +12,28 @@ export class AppealService {
     private readonly appealRepo: Repository<Appeal>,
   ) {}
 
-  /** Создание обращения */
   async create(dto: CreateAppealDto) {
     await this.appealRepo.save(dto);
     return { code: 201, message: 'Обращение успешно создано' };
   }
 
-  /** Просмотр всех обращений */
   async findAll() {
     return await this.appealRepo.find();
   }
 
-  /** Получение одного обращения по id */
   async findOne(id: string) {
     return await this.appealRepo.findOne({ where: { id } });
   }
 
-  /** Получение всех обращений одного пользователя */
-  async findAllByPhone(userId: string) {
+  async findAllByUser(userId: string) {
     return await this.appealRepo.find({ where: { createdUser: { id: userId } } });
   }
 
-  /** Удаление обращения  */
   async remove(id: string) {
     await this.appealRepo.delete(id);
     return { code: 204, message: 'Обращение удалено' };
   }
 
-  /** Обновление статуса обращения  */
   async updateStatus(id: string, dto: NewStatusAppealDto) {
     await this.appealRepo.update(id, { status: dto.status });
     return { code: 200, message: 'Статус обращения обновлён' };

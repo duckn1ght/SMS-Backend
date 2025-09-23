@@ -9,17 +9,50 @@ export class Appeal extends AbstractEntity<Appeal> {
   @JoinColumn({ name: 'created_user_id' })
   createdUser: User;
 
-  @Column()
-  phone: string;
+  @Column({ nullable: true })
+  phone?: string;
 
-  @Column()
-  text: string;
+  @Column({ nullable: true })
+  sum?: string;
 
-  @Column()
-  type: APPEAL_TYPE;
+  @Column({ nullable: true })
+  who?: string;
 
-  @Column()
+  @Column({ name: 'how_send_money', nullable: true })
+  howSendMoneny?: string;
+
+  @Column({ nullable: true })
+  location?: string;
+
+  @Column({ name: 'communication_method', nullable: true })
+  communicationMethod?: string;
+
+  @Column({ nullable: true })
+  when?: string;
+
+  @Column({ name: 'help_ask', nullable: true })
+  helpAsk?: string;
+
+  @Column({ nullable: true })
+  details?: string;
+
+  @Column({ nullable: true })
+  type?: APPEAL_TYPE;
+
+  @Column({ default: APPEAL_STATUS.NEW })
   status: APPEAL_STATUS;
+
+  @Column({ nullable: true })
+  iin?: string;
+
+  @Column({ nullable: true })
+  fio?: string;
+
+  @Column({ nullable: true })
+  userPhone: string;
+
+  @Column({ nullable: true })
+  region: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
