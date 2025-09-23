@@ -1,3 +1,4 @@
+import { ActionLog } from 'src/features/action-log/entities/action-log.entity';
 import { Blacklist } from 'src/features/blacklist/entities/blacklist.entity';
 import { Report } from 'src/features/report/entities/report.entity';
 import { User } from 'src/features/user/entities/user.entity';
@@ -40,4 +41,12 @@ export const REPORT_SELECT: FindOptionsSelect<Report> = {
   blacklist: BLACKLIST_SELECT,
   createdAt: true,
   updatedAt: true,
+};
+
+export const ACTION_LOG_SELECT: FindOptionsSelect<ActionLog> = {
+  id: true,
+  message: true,
+  type: true,
+  user: USER_SELECT,
+  createdAt: true,
 };

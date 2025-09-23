@@ -9,8 +9,9 @@ import { AndroidJwtStrategy } from './stragegies/android-jwt.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './types/jwtPayload.type';
 import { RegDto } from './dto/reg.dto';
-import type { JwtReq } from './types/jwtReq.type';
 import { CatchErrors } from 'src/const/check.decorator';
+import { ActionLogService } from '../action-log/action-log.service';
+import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly userRep: Repository<User>,
+    private logService: ActionLogService,
   ) {}
 
   @CatchErrors()
@@ -28,6 +30,13 @@ export class AuthService {
     if (existedUser) {
       const isMatch = await bcrypt.compare(dto.password, existedUser.password);
       if (isMatch) {
+        await this.logService.createLog(
+          {
+            message: `Пользователь ${existedUser.name} авторизовался`,
+            type: ACTION_LOG_TYPE.INFO,
+          },
+          existedUser.id,
+        );
         return await this.#getJwt(existedUser);
       } else {
         return { code: 400, message: 'Неверный пароль' };
@@ -36,14 +45,13 @@ export class AuthService {
       return { code: 404, message: 'Данный номер не зарегистрирован' };
     }
   }
-  
+
   @CatchErrors()
   async registration(dto: RegDto) {
     const existedUser = await this.userRep.findOne({
       where: { phone: dto.phone },
     });
-    if (existedUser)
-      return { code: 400, message: 'Данный номер уже зарегистрирован' };
+    if (existedUser) return { code: 400, message: 'Данный номер уже зарегистрирован' };
     const newUser = await this.userRep.save({
       name: dto.name,
       phone: dto.phone,
@@ -51,6 +59,13 @@ export class AuthService {
       role: USER_ROLE.USER,
       clientType: CLIENT_TYPE.ANDROID,
     });
+    await this.logService.createLog(
+      {
+        message: `Пользователь ${newUser.name} зарегистрировался`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      newUser.id,
+    );
     return await this.#getJwt(newUser);
   }
 
@@ -64,6 +79,7 @@ export class AuthService {
     const payload: JwtPayload = {
       id: user.id,
       phone: user.phone,
+      name: user.name || '',
       role: user.role,
       client_type: user.clientType,
     };
@@ -78,7 +94,7 @@ export class AuthService {
       case CLIENT_TYPE.WEB:
         return {
           secret: process.env.WEB_JWT_SECRET_KEY,
-          expiresIn: process.env.WEB_JWT_EXPIRES_IN || '1h',
+          expiresIn: process.env.WEB_JWT_EXPIRES_IN || '12h',
         };
       case CLIENT_TYPE.ANDROID:
         return {

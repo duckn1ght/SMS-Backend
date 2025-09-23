@@ -29,7 +29,7 @@ export class BlacklistController {
   @UseGuards(WebJwtGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateBlacklistDto, @Req() req: JwtReq) {
-    return this.blacklistService.create(dto, req.user.id);
+    return this.blacklistService.create(dto, req);
   }
 
   @Get()

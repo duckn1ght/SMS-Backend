@@ -1,0 +1,56 @@
+import { HttpException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { ActionLog } from './entities/action-log.entity';
+import { CreateAppealDto } from '../appeal/dto/create-appeal.dto';
+import { CreateLogDto } from './dto/create-log.dto';
+import { CatchErrors } from 'src/const/check.decorator';
+import { ACTION_LOG_SELECT } from 'src/const/selects';
+
+@Injectable()
+export class ActionLogService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    @InjectRepository(ActionLog)
+    private readonly logRepo: Repository<ActionLog>,
+  ) {}
+
+  @CatchErrors()
+  async createLog(dto: CreateLogDto, userId: string) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new HttpException('Пользователь по токену не найден', 403);
+    await this.logRepo.save({ ...dto, user });
+    return { code: 201, message: 'Лог успешно создан' };
+  }
+
+  @CatchErrors()
+  async get() {
+    return await this.logRepo.find({ relations: { user: true }, select: ACTION_LOG_SELECT });
+  }
+
+  @CatchErrors()
+  async getById(id: string) {
+    return await this.logRepo.find({
+      relations: { user: true },
+      select: ACTION_LOG_SELECT,
+      where: { id },
+    });
+  }
+
+  @CatchErrors()
+  async getByUserId(userId: string) {
+    return await this.logRepo.find({
+      relations: { user: true },
+      select: ACTION_LOG_SELECT,
+      where: { user: { id: userId } },
+    });
+  }
+
+  @CatchErrors()
+  async remove(id: string) {
+    await this.logRepo.delete(id);
+    return {code: 204, message: 'Лог успешно удален'}
+  }
+}

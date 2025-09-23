@@ -18,7 +18,7 @@ export class AppealController {
   @Post()
   @UseGuards(AndroidJwtGuard)
   create(@Body() dto: CreateAppealDto, @Req() r: JwtReq) {
-    return this.appealService.create(dto, r.user.id);
+    return this.appealService.create(dto, r);
   }
 
   @Get()
@@ -47,19 +47,19 @@ export class AppealController {
 
   @Delete(':id')
   @UseGuards(AndroidJwtGuard)
-  remove(@Param('id') id: string) {
-    return this.appealService.remove(id);
+  remove(@Param('id') id: string, @Req() r: JwtReq) {
+    return this.appealService.remove(id, r);
   }
 
   @Patch(':id')
   @UseGuards(AndroidJwtGuard)
-  update(@Param('id') id: string, @Body() dto: UpdateAppealDto) {
-    return this.appealService.update(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateAppealDto, @Req() r: JwtReq) {
+    return this.appealService.update(id, dto, r);
   }
 
   @Patch(':id/status')
   @UseGuards(WebJwtGuard)
-  updateStatus(@Param('id') id: string, @Body() dto: NewStatusAppealDto) {
-    return this.appealService.updateStatus(id, dto);
+  updateStatus(@Param('id') id: string, @Body() dto: NewStatusAppealDto, @Req() r: JwtReq) {
+    return this.appealService.updateStatus(id, dto, r);
   }
 }

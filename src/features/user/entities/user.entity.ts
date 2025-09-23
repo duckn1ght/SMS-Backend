@@ -5,6 +5,7 @@ import { Blacklist } from 'src/features/blacklist/entities/blacklist.entity';
 import { Whitelist } from 'src/features/whitelist/entities/whitelist.entity';
 import { Report } from 'src/features/report/entities/report.entity';
 import { Appeal } from 'src/features/appeal/entities/appeal.entity';
+import { ActionLog } from 'src/features/action-log/entities/action-log.entity';
 
 @Entity({ name: 'users' })
 export class User extends AbstractEntity<User> {
@@ -46,4 +47,7 @@ export class User extends AbstractEntity<User> {
 
   @OneToMany(() => Appeal, (a) => a.createdUser)
   appeals: Appeal[];
+
+  @OneToMany(() => ActionLog, (l) => l.user)
+  logs: ActionLog[];
 }

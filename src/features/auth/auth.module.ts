@@ -7,6 +7,7 @@ import { User } from '../user/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { WebJwtStrategy } from './stragegies/web-jwt.strategy';
 import { AndroidJwtStrategy } from './stragegies/android-jwt.strategy';
+import { ActionLogModule } from '../action-log/action-log.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AndroidJwtStrategy } from './stragegies/android-jwt.strategy';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([User]),
+    ActionLogModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, WebJwtStrategy, AndroidJwtStrategy],

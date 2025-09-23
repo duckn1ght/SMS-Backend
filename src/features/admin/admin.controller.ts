@@ -18,7 +18,7 @@ export class AdminController {
     if (check.result) {
       return check.return;
     }
-    return this.adminService.createUser(dto);
+    return this.adminService.createUser(dto, r);
   }
 
   /**
