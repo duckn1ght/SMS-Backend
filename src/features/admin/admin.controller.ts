@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 
 @ApiBearerAuth()
 @ApiTags('Админ Панель')
@@ -19,6 +20,24 @@ export class AdminController {
       return check.return;
     }
     return this.adminService.createUser(dto, r);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Get('users')
+  getUser() {
+    return this.adminService.getUsers();
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Get('sms-ban-words')
+  getSmsBanWords() {
+    return this.adminService.getBanWords();
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Post('sms-ban-words')
+  createSmsBanWord(@Body() dto: CreateSmsBanWordDto, @Req() r: JwtReq) {
+    return this.adminService.addBanWord(dto, r);
   }
 
   /**

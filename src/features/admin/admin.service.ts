@@ -10,19 +10,23 @@ import { CatchErrors } from 'src/const/check.decorator';
 import { ActionLogService } from '../action-log/action-log.service';
 import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
 import type { JwtReq } from '../auth/types/jwtReq.type';
+import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
+import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(User)
     private readonly userRed: Repository<User>,
+    @InjectRepository(SmsBanWord)
+    private readonly banWordRepo: Repository<SmsBanWord>,
     private logService: ActionLogService,
   ) {}
 
   @CatchErrors()
   async createUser(dto: CreateUserDto, r: JwtReq) {
     const existedUser = await this.userRed.findOne({
-      where: { phone: dto.phone },
+      where: { email: dto.email },
       select: { id: true },
     });
     if (existedUser) {
@@ -32,7 +36,7 @@ export class AdminService {
     const platform = dto.role === USER_ROLE.USER ? CLIENT_TYPE.ANDROID : CLIENT_TYPE.WEB;
     console.log(platform);
     await this.userRed.save({
-      phone: dto.phone,
+      email: dto.email,
       name: dto.name,
       password: hashedPassword,
       role: dto.role,
@@ -40,7 +44,7 @@ export class AdminService {
     });
     await this.logService.createLog(
       {
-        message: `Администратор ${r.user.name} создал нового пользователя`,
+        message: `Администратор ${r.user.name} создал нового пользователя: ${dto.name}`,
         type: ACTION_LOG_TYPE.INFO,
       },
       r.user.id,
@@ -51,5 +55,26 @@ export class AdminService {
   @CatchErrors()
   async getUsers() {
     return await this.userRed.find({ select: USER_SELECT });
+  }
+
+  @CatchErrors()
+  async addBanWord(dto: CreateSmsBanWordDto, r: JwtReq) {
+    await this.banWordRepo.save({ word: dto.word });
+    await this.logService.createLog(
+      {
+        message: `Администратор ${r.user.name} добавил новое СМС слово-фильтр: ${dto.word}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { code: 201, message: 'Бан-слово добавлено' };
+  }
+
+  @CatchErrors()
+  async getBanWords() {
+    return await this.banWordRepo.find({
+      relations: { createdUser: true },
+      select: { createdAt: true, id: true, updatedAt: true, word: true, createdUser: USER_SELECT },
+    });
   }
 }

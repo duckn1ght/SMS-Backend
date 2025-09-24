@@ -18,6 +18,6 @@ export class WebJwtStrategy extends PassportStrategy(Strategy, 'jwt-web') {
   validate(payload: JwtPayload) {
     if (payload.client_type !== CLIENT_TYPE.WEB)
       throw new UnauthorizedException('Invalid token for web client');
-    return { id: payload.id, email: payload.phone, role: payload.role, name: payload.name };
+    return { id: payload.id, role: payload.role, name: payload.name };
   }
 }

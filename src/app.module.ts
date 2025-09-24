@@ -16,6 +16,7 @@ import { PhoneModule } from './features/phone/phone.module';
 import { ReportModule } from './features/report/report.module';
 import { AppealModule } from './features/appeal/appeal.module';
 import { ActionLogModule } from './features/action-log/action-log.module';
+import { SmsModule } from './features/sms/sms.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ActionLogModule } from './features/action-log/action-log.module';
     ReportModule,
     AppealModule,
     ActionLogModule,
+    SmsModule,
   ],
   controllers: [AppController],
 })

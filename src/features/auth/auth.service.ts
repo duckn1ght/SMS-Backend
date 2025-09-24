@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { CLIENT_TYPE, USER_ROLE } from '../user/types/user.types';
-import { AndroidJwtStrategy } from './stragegies/android-jwt.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './types/jwtPayload.type';
 import { RegDto } from './dto/reg.dto';
@@ -24,9 +23,17 @@ export class AuthService {
 
   @CatchErrors()
   async auth(dto: AuthDto) {
-    const existedUser = await this.userRep.findOne({
-      where: { phone: dto.phone },
-    });
+    let existedUser
+    if (dto.clientType === CLIENT_TYPE.ANDROID) {
+      existedUser = await this.userRep.findOne({
+        where: { phone: dto.phone },
+      });
+    } else {
+      existedUser = await this.userRep.findOne({
+        where: { email: dto.email },
+      });
+    }
+
     if (existedUser) {
       const isMatch = await bcrypt.compare(dto.password, existedUser.password);
       if (isMatch) {
@@ -78,7 +85,6 @@ export class AuthService {
   async #getJwt(user: User) {
     const payload: JwtPayload = {
       id: user.id,
-      phone: user.phone,
       name: user.name || '',
       role: user.role,
       client_type: user.clientType,

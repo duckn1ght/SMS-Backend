@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { SeederService } from './seeder.service';
+import { User } from 'src/features/user/entities/user.entity';
 
 @Module({
   imports: [
@@ -17,6 +19,14 @@ import { ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([User])
   ],
+  providers: [SeederService],
 })
-export class DatabaseModule {}
+export class DatabaseModule {
+  constructor(private readonly seederService: SeederService) {}
+
+  async onModuleInit() {
+    await this.seederService.seed();
+  }
+}

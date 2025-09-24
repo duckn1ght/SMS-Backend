@@ -1,14 +1,24 @@
 import { ApiBody, ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { CLIENT_TYPE } from 'src/features/user/types/user.types';
 
 export class AuthDto {
-  @IsPhoneNumber(undefined, { message: 'Неверный формат номера' })
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
-  phone: string;
+  @IsPhoneNumber(undefined, { message: 'Неверный формат номера' })
+  phone?: string;
+
+  @IsOptional()
+  @ApiProperty()
+  @IsEmail({}, { message: 'Неверный формат электронной почты' })
+  email?: string;
 
   @IsString()
-  @IsNotEmpty()
   @ApiProperty()
+  @IsNotEmpty()
   password: string;
+
+  @ApiProperty()
+  @IsEnum(CLIENT_TYPE)
+  clientType: CLIENT_TYPE;
 }

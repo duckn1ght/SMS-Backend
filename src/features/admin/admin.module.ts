@@ -4,9 +4,10 @@ import { AdminController } from './admin.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { ActionLogModule } from '../action-log/action-log.module';
+import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), ActionLogModule],
+  imports: [TypeOrmModule.forFeature([User, SmsBanWord]), ActionLogModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

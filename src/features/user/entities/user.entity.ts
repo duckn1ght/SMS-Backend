@@ -6,14 +6,18 @@ import { Whitelist } from 'src/features/whitelist/entities/whitelist.entity';
 import { Report } from 'src/features/report/entities/report.entity';
 import { Appeal } from 'src/features/appeal/entities/appeal.entity';
 import { ActionLog } from 'src/features/action-log/entities/action-log.entity';
+import { SmsBanWord } from 'src/features/sms/entities/sms-ban-word.entity';
 
 @Entity({ name: 'users' })
 export class User extends AbstractEntity<User> {
-  @Column()
-  phone: string;
+  @Column({ nullable: true })
+  phone?: string;
 
-  @Column()
-  password: string;
+  @Column({ nullable: true })
+  email?: string;
+
+  @Column({ nullable: true })
+  password?: string;
 
   @Column()
   role: USER_ROLE;
@@ -50,4 +54,7 @@ export class User extends AbstractEntity<User> {
 
   @OneToMany(() => ActionLog, (l) => l.user)
   logs: ActionLog[];
+
+  @OneToMany(() => SmsBanWord, (s) => s.createdUser)
+  smsBanWords: SmsBanWord[];
 }
