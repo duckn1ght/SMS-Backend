@@ -27,20 +27,20 @@ export class AppealController {
     return this.appealService.findAll();
   }
 
-  @Get(':id')
+  @Get('by-id:id')
   @UseGuards(UniversalJwtGuard)
   findOne(@Param('id') id: string) {
     return this.appealService.findOne(id);
   }
 
-  @Get('user/:userId')
+  @Get('by-user/:userId')
   @UseGuards(WebJwtGuard)
   findAllByUser(@Param('userId') userId: string) {
     return this.appealService.findAllByUser(userId);
   }
 
   @Get('my')
-  @UseGuards(WebJwtGuard)
+  @UseGuards(AndroidJwtGuard)
   findMy(@Req() r: JwtReq) {
     return this.appealService.findAllByUser(r.user.id);
   }

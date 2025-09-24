@@ -12,6 +12,8 @@ export const USER_SELECT: FindOptionsSelect<User> = {
   role: true,
   createdAt: true,
   updatedAt: true,
+  organization: true,
+  position: true,
 };
 
 export const BLACKLIST_SELECT: FindOptionsSelect<Blacklist> = {

@@ -78,17 +78,32 @@ export class BlacklistService {
   }
 
   @CatchErrors()
-  async update(dto: UpdateBlacklistDto, id: string) {
+  async update(dto: UpdateBlacklistDto, id: string, r: JwtReq) {
     const entry = await this.blacklistRep.findOne({ where: { id } });
     if (!entry) throw new HttpException('Запись не найдена', 404);
     await this.blacklistRep.update(id, dto);
+    const updatedBlacklist = await this.blacklistRep.findOne({ where: { id: id } });
+    await this.logService.createLog(
+      {
+        message: `Пользователь ${r.user.name} обновил запись о номере ${updatedBlacklist?.phone} в Черном Списке`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
     return { code: 200, message: 'Запись успешно обновлена' };
   }
 
   @CatchErrors()
-  @CatchErrors()
-  async delete(id: string) {
+  async delete(id: string, r: JwtReq) {
     await this.blacklistRep.delete(id);
+    const deletedBlacklist = await this.blacklistRep.findOne({ where: { id: id } });
+    await this.logService.createLog(
+      {
+        message: `Пользователь ${r.user.name} обновил запись о номере ${deletedBlacklist?.phone} в Черном Списке`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
     return { code: 204, message: 'Запись успешно удалена' };
   }
 }

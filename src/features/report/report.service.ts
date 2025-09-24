@@ -7,6 +7,9 @@ import { Report } from './entities/report.entity';
 import { User } from '../user/entities/user.entity';
 import { BLACKLIST_STATUS } from '../blacklist/types/blacklist.types';
 import { REPORT_SELECT } from 'src/const/selects';
+import { JwtReq } from '../auth/types/jwtReq.type';
+import { ActionLogService } from '../action-log/action-log.service';
+import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
 
 @Injectable()
 export class ReportService {
@@ -18,13 +21,14 @@ export class ReportService {
     @InjectRepository(User)
     private userRep: Repository<User>,
     private dataSource: DataSource,
+    private logService: ActionLogService,
   ) {}
 
-  async create(dto: CreateReportDto, userId: string) {
+  async create(dto: CreateReportDto, r: JwtReq) {
     const existedBlacklist = await this.blacklistRep.findOne({
       where: { phone: dto.phone },
     });
-    const user = await this.userRep.findOne({ where: { id: userId } });
+    const user = await this.userRep.findOne({ where: { id: r.user.id } });
     if (!user) throw new HttpException('Пользователь не найден', 404);
 
     if (existedBlacklist) {
@@ -35,7 +39,6 @@ export class ReportService {
       });
       return newReport;
     } else {
-      // Транзакция для Blacklist и Report
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -46,13 +49,20 @@ export class ReportService {
           comment: dto.comment,
           createdUser: user,
         });
-        const newReport = await queryRunner.manager.save(Report, {
+        await queryRunner.manager.save(Report, {
           createdUser: user,
           comment: dto.comment,
           blacklist: newBlacklist,
         });
+        await this.logService.createLog(
+          {
+            message: `Пользователь ${r.user.name} создал жалобу на номер ${dto.phone}`,
+            type: ACTION_LOG_TYPE.INFO,
+          },
+          r.user.id,
+        );
         await queryRunner.commitTransaction();
-        return newReport;
+        return { code: 201, message: 'Жалоба на номер успешно создана' };
       } catch (err) {
         await queryRunner.rollbackTransaction();
         throw err;
@@ -84,5 +94,19 @@ export class ReportService {
     });
     if (!report) throw new HttpException('Жалоба не найдена', 404);
     return report;
+  }
+
+  async remove(id: string, r: JwtReq) {
+    const deletingBlacklist = await this.reportRep.findOne({ where: { id }, relations: { blacklist: true } });
+    if (!deletingBlacklist) return { code: 404, message: 'Жалоба с таким id не найдена' };
+    await this.reportRep.remove(deletingBlacklist);
+    await this.logService.createLog(
+      {
+        message: `Пользователь ${r.user.name} удалил свою жалобу на номер ${deletingBlacklist.blacklist.phone}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { code: 204, message: 'Жалоба на номер успешно удалена' };
   }
 }

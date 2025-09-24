@@ -18,6 +18,6 @@ export class AndroidJwtStrategy extends PassportStrategy(Strategy, 'jwt-android'
   validate(payload: JwtPayload) {
     if (payload.client_type !== CLIENT_TYPE.ANDROID)
       throw new UnauthorizedException('Invalid token for android client');
-    return { id: payload.id, email: payload.phone, role: payload.role };
+    return { id: payload.id, email: payload.phone, role: payload.role, name: payload.name };
   }
 }

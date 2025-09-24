@@ -52,13 +52,13 @@ export class BlacklistController {
 
   @Patch(':id')
   @UseGuards(WebJwtGuard)
-  async update(@Body() dto: UpdateBlacklistDto, @Param('id') id: string) {
-    return this.blacklistService.update(dto, id);
+  async update(@Body() dto: UpdateBlacklistDto, @Param('id') id: string, @Req() r: JwtReq) {
+    return this.blacklistService.update(dto, id, r);
   }
 
   @Delete(':id')
   @UseGuards(WebJwtGuard)
-  async delete(@Param('id') id: string) {
-    return await this.blacklistService.delete(id);
+  async delete(@Param('id') id: string, @Req() r: JwtReq) {
+    return await this.blacklistService.delete(id, r);
   }
 }
