@@ -62,7 +62,7 @@ export class AuthService {
     const newUser = await this.userRep.save({
       name: dto.name,
       phone: dto.phone,
-      city: dto.city,
+      region: dto.region,
       password: await bcrypt.hash(dto.password, 10),
       role: USER_ROLE.USER,
       clientType: CLIENT_TYPE.ANDROID,

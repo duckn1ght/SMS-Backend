@@ -28,8 +28,8 @@ export class User extends AbstractEntity<User> {
   @Column({ nullable: true })
   name?: string;
 
-  @Column({ nullable: true, default: 'Павлодар' })
-  city?: string;
+  @Column({ nullable: true, default: 'Павлодарская область' })
+  region?: string;
 
   @Column({ nullable: true })
   position?: string;

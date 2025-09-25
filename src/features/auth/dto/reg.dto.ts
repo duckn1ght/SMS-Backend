@@ -20,5 +20,5 @@ export class RegDto {
   @IsString()
   @IsOptional()
   @ApiProperty()
-  city?: string;
+  region?: string;
 }
