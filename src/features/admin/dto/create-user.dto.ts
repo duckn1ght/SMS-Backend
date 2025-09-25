@@ -23,6 +23,12 @@ export class CreateUserDto {
   @IsString()
   position?: string;
 
+  
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  city?: string;
+
   @ApiProperty()
   @IsOptional()
   @IsString()

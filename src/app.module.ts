@@ -17,6 +17,7 @@ import { ReportModule } from './features/report/report.module';
 import { AppealModule } from './features/appeal/appeal.module';
 import { ActionLogModule } from './features/action-log/action-log.module';
 import { SmsModule } from './features/sms/sms.module';
+import { StatisticsModule } from './features/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { SmsModule } from './features/sms/sms.module';
     AppealModule,
     ActionLogModule,
     SmsModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
 })
