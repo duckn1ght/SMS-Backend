@@ -44,6 +44,12 @@ export class WhitelistController {
     return this.whitelistService.getOneByNumber(phone);
   }
 
+  @Get('orgs')
+  @UseGuards(UniversalJwtGuard)
+  async getOrgs() {
+    return this.whitelistService.getOrgs();
+  }
+
   @Get(':id')
   @UseGuards(UniversalJwtGuard)
   async getOneById(@Param('id') id: string) {

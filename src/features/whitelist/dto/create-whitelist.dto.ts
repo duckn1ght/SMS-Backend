@@ -6,9 +6,9 @@ export class CreateWhitelistDto {
   @IsNotEmpty()
   @ApiProperty()
   phone: string;
-  
+
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   @ApiProperty()
-  comment?: string;
+  organization: string;
 }

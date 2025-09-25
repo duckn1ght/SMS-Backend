@@ -2,16 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RapidocModule } from '@b8n/nestjs-rapidoc';
-import {
-  INestApplication,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const PORT = process.env.PORT ?? 3000;
 
+  setupCors(app, ['localhost:8080']);
   setupValidate(app);
   setupPrefixAndVersioning(app);
   setupDocs(app);
@@ -23,6 +20,15 @@ async function bootstrap() {
   });
 }
 bootstrap();
+
+async function setupCors(app: INestApplication<any>, hosts: string[]) {
+  app.enableCors({
+    origin: hosts,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+    credentials: true,
+  });
+}
 
 async function setupDocs(app: INestApplication<any>) {
   const config = new DocumentBuilder()

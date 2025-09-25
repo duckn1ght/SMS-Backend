@@ -30,7 +30,7 @@ export const BLACKLIST_SELECT: FindOptionsSelect<Blacklist> = {
 export const WHITELIST_SELECT: FindOptionsSelect<Whitelist> = {
   id: true,
   phone: true,
-  comment: true,
+  organization: true,
   createdUser: USER_SELECT,
   createdAt: true,
   updatedAt: true,

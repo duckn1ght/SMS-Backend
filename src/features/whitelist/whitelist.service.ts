@@ -37,6 +37,10 @@ export class WhitelistService {
     return await this.whitelistRep.find({ select: WHITELIST_SELECT });
   }
 
+  async getOrgs() {
+    return await this.whitelistRep.find({ select: { id: true, organization: true, createdAt: true, updatedAt: true } });
+  }
+
   async getOneByNumber(phone: string) {
     return await this.whitelistRep.findOne({ where: { phone }, select: WHITELIST_SELECT });
   }

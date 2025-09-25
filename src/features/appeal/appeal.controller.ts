@@ -16,7 +16,7 @@ export class AppealController {
   constructor(private readonly appealService: AppealService) {}
 
   @Post()
-  @UseGuards(AndroidJwtGuard)
+  @UseGuards(UniversalJwtGuard)
   create(@Body() dto: CreateAppealDto, @Req() r: JwtReq) {
     return this.appealService.create(dto, r);
   }
