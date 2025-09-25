@@ -7,6 +7,7 @@ import { Whitelist } from '../whitelist/entities/whitelist.entity';
 import { Appeal } from '../appeal/entities/appeal.entity';
 import { Report } from '../report/entities/report.entity';
 import { StatisticsGateway } from './statistics.gateway';
+import 'pdfkit-table';
 
 @Injectable()
 export class StatisticsService {
@@ -80,17 +81,6 @@ export class StatisticsService {
       .where("wl.createdAt >= NOW() - INTERVAL '1 month'")
       .getCount();
 
-    // 5. Количество активных пользователей (например, заходили за последние 30 дней)
-    // const activeUsers = await this.userRepo
-    //   .createQueryBuilder('user')
-    //   .where('user.lastLoginAt >= NOW() - INTERVAL \'30 day\'')
-    //   .getCount();
-
-    // 6. Сводная информация о вредоносных SMS и звонках
-    // (пример, если есть сущности Report или Sms)
-    // const maliciousSmsCount = await this.smsRepo.count({ where: { isMalicious: true } });
-    // const maliciousCallsCount = await this.callRepo.count({ where: { isMalicious: true } });
-
     return {
       appealsByStatus,
       appealsByRegion,
@@ -104,5 +94,11 @@ export class StatisticsService {
       // maliciousSmsCount,
       // maliciousCallsCount,
     };
+  }
+
+  async getPdfStatistics() {
+    const stats = await this.getStatistics();
+
+    const PDFDocument = (await import('pdfkit')).default || (await import('pdfkit'));
   }
 }

@@ -58,5 +58,5 @@ $ yarn run test:cov
 ## Список установленных библиотек
 
 ```bash
-@nestjs/typeorm typeorm @nestjs/config @nestjs/throttler @nestjs/cache-manager cache-manager cache-manager-redis-store pg @nestjs/swagger @nestjs/serve-static @nestjs/passport passport-jwt @nestjs/jwt class-validator class-transformer passport
+@nestjs/typeorm typeorm @nestjs/config @nestjs/throttler @nestjs/cache-manager cache-manager cache-manager-redis-store pg @nestjs/swagger @nestjs/serve-static @nestjs/passport passport-jwt @nestjs/jwt class-validator class-transformer @nestjs/websockets @nestjs/platform-socket.io socket.io passport pdfkit-table
 ```

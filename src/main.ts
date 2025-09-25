@@ -20,7 +20,7 @@ async function bootstrap() {
   });
 }
 bootstrap();
-
+  
 async function setupCors(app: INestApplication<any>, hosts: string[]) {
   app.enableCors({
     origin: hosts,

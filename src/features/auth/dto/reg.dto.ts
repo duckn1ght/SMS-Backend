@@ -1,15 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-} from 'class-validator';
-import { CLIENT_TYPE } from 'src/features/user/types/user.types';
+import { IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class RegDto {
-  @IsPhoneNumber(undefined, {message: "Неверный формат номера"})
+  @IsPhoneNumber(undefined, { message: 'Неверный формат номера' })
   @IsNotEmpty()
   @ApiProperty()
   phone: string;
@@ -23,4 +16,9 @@ export class RegDto {
   @IsOptional()
   @ApiProperty()
   name?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  city?: string;
 }

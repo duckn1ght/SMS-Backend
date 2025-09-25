@@ -23,7 +23,7 @@ export class AuthService {
 
   @CatchErrors()
   async auth(dto: AuthDto) {
-    let existedUser
+    let existedUser;
     if (dto.clientType === CLIENT_TYPE.ANDROID) {
       existedUser = await this.userRep.findOne({
         where: { phone: dto.phone },
@@ -62,6 +62,7 @@ export class AuthService {
     const newUser = await this.userRep.save({
       name: dto.name,
       phone: dto.phone,
+      city: dto.city,
       password: await bcrypt.hash(dto.password, 10),
       role: USER_ROLE.USER,
       clientType: CLIENT_TYPE.ANDROID,
