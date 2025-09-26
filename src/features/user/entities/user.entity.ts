@@ -25,6 +25,9 @@ export class User extends AbstractEntity<User> {
   @Column({ name: 'client_type' })
   clientType: CLIENT_TYPE;
 
+  @Column({name: 'is_active', default: true})
+  isActive: boolean;
+
   @Column({ nullable: true })
   name?: string;
 

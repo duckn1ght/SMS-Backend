@@ -34,19 +34,19 @@ export class WhitelistService {
   }
 
   async get() {
-    return await this.whitelistRep.find({ select: WHITELIST_SELECT });
+    return await this.whitelistRep.find({ select: WHITELIST_SELECT, relations: { createdUser: true } });
   }
 
   async getOrgs() {
-    return await this.whitelistRep.find({ select: { id: true, organization: true} });
+    return await this.whitelistRep.find({ select: { id: true, organization: true } });
   }
 
   async getOneByNumber(phone: string) {
-    return await this.whitelistRep.findOne({ where: { phone }, select: WHITELIST_SELECT });
+    return await this.whitelistRep.findOne({ where: { phone }, select: WHITELIST_SELECT, relations: { createdUser: true } });
   }
 
   async getOneById(id: string) {
-    return await this.whitelistRep.findOne({ where: { id }, select: WHITELIST_SELECT });
+    return await this.whitelistRep.findOne({ where: { id }, select: WHITELIST_SELECT, relations: { createdUser: true } });
   }
 
   async update(dto: UpdateWhitelistDto, id: string) {

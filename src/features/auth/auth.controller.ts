@@ -12,6 +12,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @HttpCode(200)
   async auth(@Body() dto: AuthDto) {
     return this.authService.auth(dto);
   }

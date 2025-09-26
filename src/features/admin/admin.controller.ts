@@ -1,10 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpException,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('Админ Панель')
@@ -16,9 +29,7 @@ export class AdminController {
   @HttpCode(201)
   @Post('create-user')
   createUser(@Req() r: JwtReq, @Body() dto: CreateUserDto) {
-    if (!this.#isAdmin(r.user.role)) {
-      throw new HttpException('Только у админа есть права для этого запроса', 403);
-    }
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
     return this.adminService.createUser(dto, r);
   }
 
@@ -26,6 +37,13 @@ export class AdminController {
   @Get('users')
   getUser() {
     return this.adminService.getUsers();
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Patch('user/:id')
+  updateUser(@Req() r: JwtReq, @Body() dto: UpdateUserDto, @Param('id') id: string) {
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
+    return this.adminService.updateUser(dto, id, r);
   }
 
   @UseGuards(WebJwtGuard)
@@ -44,17 +62,7 @@ export class AdminController {
   @UseGuards(WebJwtGuard)
   @HttpCode(204)
   @Delete('sms-ban-words/:id')
-  delete (@Req() r: JwtReq, @Body('id') id: string) {
+  delete(@Req() r: JwtReq, @Body('id') id: string) {
     return this.adminService.removeBanWord(id, r);
-  }
-
-  /**
-   * Проверяет, является ли указанная роль админской.
-   *
-   * Если роль не админская, то возвращает result = false и объект return для сообщения.
-   * Если роль админская, то result = true.
-   */
-  #isAdmin(role: string) {
-    return role === 'ADMIN';
   }
 }

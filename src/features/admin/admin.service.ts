@@ -12,7 +12,7 @@ import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
-import e from 'express';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AdminService {
@@ -30,9 +30,8 @@ export class AdminService {
       where: { email: dto.email },
       select: { id: true },
     });
-    if (existedUser) {
-      throw new HttpException('Этот email уже зарегистрирован', 400);
-    }
+    if (existedUser) throw new HttpException('Этот email уже зарегистрирован', 400);
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const platform = dto.role === USER_ROLE.USER ? CLIENT_TYPE.ANDROID : CLIENT_TYPE.WEB;
     console.log(platform);
@@ -56,6 +55,25 @@ export class AdminService {
   @CatchErrors()
   async getUsers() {
     return await this.userRed.find({ select: USER_SELECT });
+  }
+
+  @CatchErrors()
+  async updateUser(dto: UpdateUserDto, id: string, r: JwtReq) {
+    const existedUser = await this.userRed.findOne({
+      where: { id },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    if (!existedUser) throw new HttpException('Пользователь не найден', 404);
+    
+    await this.userRed.update(id, dto);
+    await this.logService.createLog(
+      {
+        message: `Администратор ${r.user.name} обновил пользователя: ${existedUser.name}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { statusCode: 200, message: 'Пользователь успешно обновлен' };
   }
 
   @CatchErrors()

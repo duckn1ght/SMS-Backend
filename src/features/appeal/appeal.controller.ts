@@ -48,13 +48,13 @@ export class AppealController {
 
   @Delete(':id')
   @HttpCode(204)
-  @UseGuards(AndroidJwtGuard)
+  @UseGuards(UniversalJwtGuard)
   remove(@Param('id') id: string, @Req() r: JwtReq) {
     return this.appealService.remove(id, r);
   }
 
   @Patch(':id')
-  @UseGuards(AndroidJwtGuard)
+  @UseGuards(UniversalJwtGuard)
   update(@Param('id') id: string, @Body() dto: UpdateAppealDto, @Req() r: JwtReq) {
     return this.appealService.update(id, dto, r);
   }
