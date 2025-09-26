@@ -62,7 +62,7 @@ export class ReportService {
           r.user.id,
         );
         await queryRunner.commitTransaction();
-        return { code: 201, message: 'Жалоба на номер успешно создана' };
+        return { statusCode: 201, message: 'Жалоба на номер успешно создана' };
       } catch (err) {
         await queryRunner.rollbackTransaction();
         throw err;
@@ -107,6 +107,6 @@ export class ReportService {
       },
       r.user.id,
     );
-    return { code: 204, message: 'Жалоба на номер успешно удалена' };
+    return { statusCode: 204, message: 'Жалоба на номер успешно удалена' };
   }
 }

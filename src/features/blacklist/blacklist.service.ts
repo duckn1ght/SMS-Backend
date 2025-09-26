@@ -48,7 +48,7 @@ export class BlacklistService {
       },
       r.user.id,
     );
-    return { code: 201, message: 'Номер успешно добавлен в Черный Список' };
+    return { statusCode: 201, message: 'Номер успешно добавлен в Черный Список' };
   }
 
   @CatchErrors()
@@ -90,7 +90,7 @@ export class BlacklistService {
       },
       r.user.id,
     );
-    return { code: 200, message: 'Запись успешно обновлена' };
+    return { statusCode: 200, message: 'Запись успешно обновлена' };
   }
 
   @CatchErrors()
@@ -104,6 +104,6 @@ export class BlacklistService {
       },
       r.user.id,
     );
-    return { code: 204, message: 'Запись успешно удалена' };
+    return { statusCode: 204, message: 'Запись успешно удалена' };
   }
 }

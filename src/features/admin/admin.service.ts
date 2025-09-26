@@ -50,7 +50,7 @@ export class AdminService {
       },
       r.user.id,
     );
-    return { code: 201, message: 'Новый пользователь успешно создан' };
+    return { statusCode: 201, message: 'Новый пользователь успешно создан' };
   }
 
   @CatchErrors()
@@ -68,7 +68,7 @@ export class AdminService {
       },
       r.user.id,
     );
-    return { code: 201, message: 'Бан-слово добавлено' };
+    return { statusCode: 201, message: 'Бан-слово добавлено' };
   }
 
   @CatchErrors()
@@ -93,6 +93,6 @@ export class AdminService {
       },
       r.user.id,
     );
-    return { code: 204, message: 'Бан-слово удалено' };
+    return { statusCode: 204, message: 'Бан-слово удалено' };
   }
 }

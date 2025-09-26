@@ -30,7 +30,7 @@ export class WhitelistService {
     if (blackExisted) return new HttpException('Этот номер существует в черном списке', 400);
 
     await this.whitelistRep.save({ createdUser: existedUser, ...dto });
-    return { code: 201, message: 'Номер успешно добавлен в Белый Список' };
+    return { statusCode: 201, message: 'Номер успешно добавлен в Белый Список' };
   }
 
   async get() {
@@ -51,11 +51,11 @@ export class WhitelistService {
 
   async update(dto: UpdateWhitelistDto, id: string) {
     await this.whitelistRep.update(id, dto);
-    return { code: 200, message: 'Запись успешно обновлена' };
+    return { statusCode: 200, message: 'Запись успешно обновлена' };
   }
 
   async delete(id: string) {
     await this.whitelistRep.delete(id);
-    return { code: 204, message: 'Запись успешно удалена' };
+    return { statusCode: 204, message: 'Запись успешно удалена' };
   }
 }

@@ -34,6 +34,6 @@ export class PhoneService {
     if (inBlacklist)
       return { status: 'blacklist', reportCount, data: inBlacklist };
 
-    return { status: 'Номера нет в базе данных', code: 200 };
+    return { status: 'Номера нет в базе данных', statusCode: 200 };
   }
 }

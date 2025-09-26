@@ -22,7 +22,7 @@ export class ActionLogService {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new HttpException('Пользователь по токену не найден', 403);
     await this.logRepo.save({ ...dto, user });
-    return { code: 201, message: 'Лог успешно создан' };
+    return { statusCode: 201, message: 'Лог успешно создан' };
   }
 
   @CatchErrors()
@@ -51,6 +51,6 @@ export class ActionLogService {
   @CatchErrors()
   async remove(id: string) {
     await this.logRepo.delete(id);
-    return {code: 204, message: 'Лог успешно удален'}
+    return {statusCode: 204, message: 'Лог успешно удален'}
   }
 }

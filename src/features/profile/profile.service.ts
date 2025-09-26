@@ -43,7 +43,7 @@ export class ProfileService {
         },
         r.user.id,
       );
-      return { code: 200, message: 'Пароль успешно изменен' };
+      return { statusCode: 200, message: 'Пароль успешно изменен' };
     } else {
       return new HttpException('Указан неверный старый пароль', 400);
     }

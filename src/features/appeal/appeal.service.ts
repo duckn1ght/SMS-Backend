@@ -28,7 +28,7 @@ export class AppealService {
       { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} создал обращение` },
       r.user.id,
     );
-    return { code: 201, message: 'Обращение успешно создано' };
+    return { statusCode: 201, message: 'Обращение успешно создано' };
   }
 
   async findAll() {
@@ -49,7 +49,7 @@ export class AppealService {
       { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} удалил обращение` },
       r.user.id,
     );
-    return { code: 204, message: 'Обращение удалено' };
+    return { statusCode: 204, message: 'Обращение удалено' };
   }
 
   async update(id: string, dto: UpdateAppealDto, r: JwtReq) {
@@ -58,7 +58,7 @@ export class AppealService {
       { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} обновил обращение` },
       r.user.id,
     );
-    return { code: 200, message: 'Обращение успешно обновлено' };
+    return { statusCode: 200, message: 'Обращение успешно обновлено' };
   }
 
   async updateStatus(id: string, dto: NewStatusAppealDto, r: JwtReq) {
@@ -67,6 +67,6 @@ export class AppealService {
       { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} обновил статус обращения` },
       r.user.id,
     );
-    return { code: 200, message: 'Статус обращения обновлён' };
+    return { statusCode: 200, message: 'Статус обращения обновлён' };
   }
 }
