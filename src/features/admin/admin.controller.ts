@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
@@ -13,11 +13,11 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @UseGuards(WebJwtGuard)
+  @HttpCode(201)
   @Post('create-user')
   createUser(@Req() r: JwtReq, @Body() dto: CreateUserDto) {
-    const check = this.#isNotAdmin(r.user.role);
-    if (check.result) {
-      return check.return;
+    if (!this.#isAdmin(r.user.role)) {
+      return new HttpException('Только у админа есть права для этого запроса', 403);
     }
     return this.adminService.createUser(dto, r);
   }
@@ -35,9 +35,17 @@ export class AdminController {
   }
 
   @UseGuards(WebJwtGuard)
+  @HttpCode(201)
   @Post('sms-ban-words')
   createSmsBanWord(@Body() dto: CreateSmsBanWordDto, @Req() r: JwtReq) {
     return this.adminService.addBanWord(dto, r);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @HttpCode(204)
+  @Delete('sms-ban-words/:id')
+  delete (@Req() r: JwtReq, @Body('id') id: string) {
+    return this.adminService.removeBanWord(id, r);
   }
 
   /**
@@ -46,15 +54,7 @@ export class AdminController {
    * Если роль не админская, то возвращает result = false и объект return для сообщения.
    * Если роль админская, то result = true.
    */
-  #isNotAdmin(role: string) {
-    if (role !== 'ADMIN')
-      return {
-        result: true,
-        return: {
-          code: 403,
-          message: 'Только у админа есть права для этого запроса',
-        },
-      };
-    return { result: false };
+  #isAdmin(role: string) {
+    return role === 'ADMIN';
   }
 }

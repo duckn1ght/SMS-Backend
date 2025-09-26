@@ -1,4 +1,4 @@
-import { Catch, Injectable } from '@nestjs/common';
+import { Catch, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -12,6 +12,7 @@ import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
+import e from 'express';
 
 @Injectable()
 export class AdminService {
@@ -30,7 +31,7 @@ export class AdminService {
       select: { id: true },
     });
     if (existedUser) {
-      return { code: 400, message: 'Этот номер телефона уже зарегистрирован' };
+      return new HttpException('Этот номер телефона уже зарегистрирован', 400);
     }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const platform = dto.role === USER_ROLE.USER ? CLIENT_TYPE.ANDROID : CLIENT_TYPE.WEB;
@@ -76,5 +77,22 @@ export class AdminService {
       relations: { createdUser: true },
       select: { createdAt: true, id: true, updatedAt: true, word: true, createdUser: USER_SELECT },
     });
+  }
+
+  @CatchErrors()
+  async removeBanWord(id: string, r: JwtReq) {
+    const existed = await this.banWordRepo.findOneBy({ id });
+    if (!existed) {
+      return new HttpException('Бан-слово с таким ID не найдено', 404);
+    }
+    await this.banWordRepo.remove(existed);
+    await this.logService.createLog(
+      {
+        message: `Администратор ${r.user.name} удалил слово-фильтр: ${existed.word}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { code: 204, message: 'Бан-слово удалено' };
   }
 }

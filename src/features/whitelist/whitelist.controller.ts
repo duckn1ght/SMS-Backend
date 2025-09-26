@@ -27,6 +27,7 @@ export class WhitelistController {
 
   @Post()
   @UseGuards(WebJwtGuard)
+  @HttpCode(201)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateWhitelistDto, @Req() req: JwtReq) {
     return this.whitelistService.create(dto, req.user.id);
@@ -63,6 +64,7 @@ export class WhitelistController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @UseGuards(WebJwtGuard)
   async delete(@Param('id') id: string) {
     return await this.whitelistService.delete(id);

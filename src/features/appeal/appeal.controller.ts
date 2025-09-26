@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Delete, Patch, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Delete, Patch, Query, UseGuards, Req, HttpCode } from '@nestjs/common';
 import { AppealService } from './appeal.service';
 import { CreateAppealDto } from './dto/create-appeal.dto';
 import { NewStatusAppealDto } from './dto/new-status-appeal.dto';
@@ -16,6 +16,7 @@ export class AppealController {
   constructor(private readonly appealService: AppealService) {}
 
   @Post()
+  @HttpCode(201)
   @UseGuards(UniversalJwtGuard)
   create(@Body() dto: CreateAppealDto, @Req() r: JwtReq) {
     return this.appealService.create(dto, r);
@@ -46,6 +47,7 @@ export class AppealController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @UseGuards(AndroidJwtGuard)
   remove(@Param('id') id: string, @Req() r: JwtReq) {
     return this.appealService.remove(id, r);

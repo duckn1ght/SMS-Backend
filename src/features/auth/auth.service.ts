@@ -1,4 +1,4 @@
-import { Injectable, Req } from '@nestjs/common';
+import { HttpException, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -46,10 +46,10 @@ export class AuthService {
         );
         return await this.#getJwt(existedUser);
       } else {
-        return { code: 400, message: 'Неверный пароль' };
+        return new HttpException('Неверный пароль', 400);
       }
     } else {
-      return { code: 404, message: 'Данный номер не зарегистрирован' };
+      return new HttpException('Данный номер не зарегистрирован', 404);
     }
   }
 
@@ -58,7 +58,7 @@ export class AuthService {
     const existedUser = await this.userRep.findOne({
       where: { phone: dto.phone },
     });
-    if (existedUser) return { code: 400, message: 'Данный номер уже зарегистрирован' };
+    if (existedUser) return new HttpException('Данный номер уже зарегистрирован', 400);
     const newUser = await this.userRep.save({
       name: dto.name,
       phone: dto.phone,

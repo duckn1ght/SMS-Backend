@@ -6,15 +6,15 @@ import { SmsBanWord } from './entities/sms-ban-word.entity';
 
 @Injectable()
 export class SmsService {
-	constructor(
-		@InjectRepository(SmsBanWord)
-		private readonly banWordRepo: Repository<SmsBanWord>,
-	) {}
+  constructor(
+    @InjectRepository(SmsBanWord)
+    private readonly banWordRepo: Repository<SmsBanWord>,
+  ) {}
 
-	async checkText(dto: CheckSmsDto): Promise<{ result: boolean }> {
-		const banWords = await this.banWordRepo.find();
-		const text = dto.text.toLowerCase();
-		const found = banWords.some(bw => text.includes(bw.word.toLowerCase()));
-		return { result: found };
-	}
+  async checkText(dto: CheckSmsDto) {
+    const banWords = await this.banWordRepo.find();
+    const text = dto.text.toLowerCase();
+    const found = banWords.some((bw) => text.includes(bw.word.toLowerCase()));
+    return { result: found };
+  }
 }

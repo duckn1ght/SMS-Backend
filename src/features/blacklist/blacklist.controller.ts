@@ -27,6 +27,7 @@ export class BlacklistController {
 
   @Post()
   @UseGuards(WebJwtGuard)
+  @HttpCode(201)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateBlacklistDto, @Req() req: JwtReq) {
     return this.blacklistService.create(dto, req);
@@ -57,6 +58,7 @@ export class BlacklistController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @UseGuards(WebJwtGuard)
   async delete(@Param('id') id: string, @Req() r: JwtReq) {
     return await this.blacklistService.delete(id, r);

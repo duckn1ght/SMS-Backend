@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Req, UseGuards, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards, Delete, HttpCode } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import type { JwtReq } from '../auth/types/jwtReq.type';
@@ -15,6 +15,7 @@ export class ReportController {
 
   @Post()
   @UseGuards(AndroidJwtGuard)
+  @HttpCode(201)
   async create(@Body() dto: CreateReportDto, @Req() req: JwtReq) {
     return this.reportService.create(dto, req);
   }
@@ -38,6 +39,7 @@ export class ReportController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @UseGuards(AndroidJwtGuard)
   async remove(@Param() id: string, @Req() r: JwtReq) {
     await this.reportService.remove(id, r);

@@ -26,8 +26,8 @@ export class WhitelistService {
       this.whitelistRep.findOne({ where: { phone: dto.phone } }),
       this.blacklistRep.findOne({ where: { phone: dto.phone } }),
     ]);
-    if (existed) return { code: 400, message: 'Этот номер уже существует в белом списке' };
-    if (blackExisted) return { code: 400, message: 'Этот номер существует в черном списке' };
+    if (existed) return new HttpException('Этот номер уже существует в белом списке', 400);
+    if (blackExisted) return new HttpException('Этот номер существует в черном списке', 400);
 
     await this.whitelistRep.save({ createdUser: existedUser, ...dto });
     return { code: 201, message: 'Номер успешно добавлен в Белый Список' };

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
@@ -29,7 +29,7 @@ export class ProfileService {
       where: { id: r.user.id },
       select: { password: true },
     });
-    if (!existedUser) return { code: 404, message: 'Пользователь не найден' };
+    if (!existedUser) return new HttpException('Пользователь не найден', 404);
     const isMatch = await bcrypt.compare(dto.oldPassword, existedUser.password);
     if (isMatch) {
       const newHashedPassword = await bcrypt.hash(dto.newPassword, 10);
@@ -45,7 +45,7 @@ export class ProfileService {
       );
       return { code: 200, message: 'Пароль успешно изменен' };
     } else {
-      return { code: 400, message: 'Указан неверный старый пароль' };
+      return new HttpException('Указан неверный старый пароль', 400);
     }
   }
 }
