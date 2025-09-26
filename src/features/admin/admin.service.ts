@@ -31,7 +31,7 @@ export class AdminService {
       select: { id: true },
     });
     if (existedUser) {
-      return new HttpException('Этот номер телефона уже зарегистрирован', 400);
+      throw new HttpException('Этот email уже зарегистрирован', 400);
     }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const platform = dto.role === USER_ROLE.USER ? CLIENT_TYPE.ANDROID : CLIENT_TYPE.WEB;
@@ -83,7 +83,7 @@ export class AdminService {
   async removeBanWord(id: string, r: JwtReq) {
     const existed = await this.banWordRepo.findOneBy({ id });
     if (!existed) {
-      return new HttpException('Бан-слово с таким ID не найдено', 404);
+      throw new HttpException('Бан-слово с таким ID не найдено', 404);
     }
     await this.banWordRepo.remove(existed);
     await this.logService.createLog(

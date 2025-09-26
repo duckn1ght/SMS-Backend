@@ -46,10 +46,10 @@ export class AuthService {
         );
         return await this.#getJwt(existedUser);
       } else {
-        return new HttpException('Неверный пароль', 400);
+        throw new HttpException('Неверный пароль', 400);
       }
     } else {
-      return new HttpException('Данный номер не зарегистрирован', 404);
+      throw new HttpException('Данный номер не зарегистрирован', 404);
     }
   }
 
@@ -58,7 +58,7 @@ export class AuthService {
     const existedUser = await this.userRep.findOne({
       where: { phone: dto.phone },
     });
-    if (existedUser) return new HttpException('Данный номер уже зарегистрирован', 400);
+    if (existedUser) throw new HttpException('Данный номер уже зарегистрирован', 400);
     const newUser = await this.userRep.save({
       name: dto.name,
       phone: dto.phone,

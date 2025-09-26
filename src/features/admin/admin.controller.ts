@@ -17,7 +17,7 @@ export class AdminController {
   @Post('create-user')
   createUser(@Req() r: JwtReq, @Body() dto: CreateUserDto) {
     if (!this.#isAdmin(r.user.role)) {
-      return new HttpException('Только у админа есть права для этого запроса', 403);
+      throw new HttpException('Только у админа есть права для этого запроса', 403);
     }
     return this.adminService.createUser(dto, r);
   }

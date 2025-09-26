@@ -98,7 +98,7 @@ export class ReportService {
 
   async remove(id: string, r: JwtReq) {
     const deletingBlacklist = await this.reportRep.findOne({ where: { id }, relations: { blacklist: true } });
-    if (!deletingBlacklist) return new HttpException('Жалоба не найдена', 404);
+    if (!deletingBlacklist) throw new HttpException('Жалоба не найдена', 404);
     await this.reportRep.remove(deletingBlacklist);
     await this.logService.createLog(
       {

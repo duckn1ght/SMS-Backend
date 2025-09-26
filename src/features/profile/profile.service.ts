@@ -29,7 +29,7 @@ export class ProfileService {
       where: { id: r.user.id },
       select: { password: true },
     });
-    if (!existedUser) return new HttpException('Пользователь не найден', 404);
+    if (!existedUser) throw new HttpException('Пользователь не найден', 404);
     const isMatch = await bcrypt.compare(dto.oldPassword, existedUser.password);
     if (isMatch) {
       const newHashedPassword = await bcrypt.hash(dto.newPassword, 10);
@@ -45,7 +45,7 @@ export class ProfileService {
       );
       return { statusCode: 200, message: 'Пароль успешно изменен' };
     } else {
-      return new HttpException('Указан неверный старый пароль', 400);
+      throw new HttpException('Указан неверный старый пароль', 400);
     }
   }
 }
