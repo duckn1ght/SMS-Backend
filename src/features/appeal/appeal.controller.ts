@@ -24,8 +24,8 @@ export class AppealController {
 
   @Get()
   @UseGuards(WebJwtGuard)
-  findAll() {
-    return this.appealService.findAll();
+  findAll(@Query('skip') skip?: number, @Query('take') take?: number) {
+    return this.appealService.findAll(take, skip);
   }
 
   @Get('by-id:id')
@@ -36,14 +36,14 @@ export class AppealController {
 
   @Get('by-user/:userId')
   @UseGuards(WebJwtGuard)
-  findAllByUser(@Param('userId') userId: string) {
-    return this.appealService.findAllByUser(userId);
+  findAllByUser(@Param('userId') userId: string, @Query('skip') skip?: number, @Query('take') take?: number) {
+    return this.appealService.findAllByUser(userId, take, skip);
   }
 
   @Get('my')
   @UseGuards(AndroidJwtGuard)
-  findMy(@Req() r: JwtReq) {
-    return this.appealService.findAllByUser(r.user.id);
+  findMy(@Req() r: JwtReq, @Query('skip') skip?: number, @Query('take') take?: number) {
+    return this.appealService.findAllByUser(r.user.id, take, skip);
   }
 
   @Delete(':id')

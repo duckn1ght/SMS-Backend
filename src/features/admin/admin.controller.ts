@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -35,8 +36,14 @@ export class AdminController {
 
   @UseGuards(WebJwtGuard)
   @Get('users')
-  getUser() {
-    return this.adminService.getUsers();
+  getUsers(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.adminService.getUsers(take, skip);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Get('user/:id')
+  getUserById(@Param('id') id: string) {
+    return this.adminService.getUserById(id);
   }
 
   @UseGuards(WebJwtGuard)
@@ -48,8 +55,14 @@ export class AdminController {
 
   @UseGuards(WebJwtGuard)
   @Get('sms-ban-words')
-  getSmsBanWords() {
-    return this.adminService.getBanWords();
+  getSmsBanWords(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.adminService.getBanWords(take, skip);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Get('logs')
+  getLogs(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.adminService.getLogs(take, skip);
   }
 
   @UseGuards(WebJwtGuard)

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Req, UseGuards, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards, Delete, HttpCode, Query } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import type { JwtReq } from '../auth/types/jwtReq.type';
@@ -22,8 +22,8 @@ export class ReportController {
 
   @Get()
   @UseGuards(WebJwtGuard)
-  async findAll() {
-    return this.reportService.findAll();
+  async findAll(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.reportService.findAll(take, skip);
   }
 
   @Get('my')

@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
+import type { FindOptionsOrder, FindOptionsOrderValue } from 'typeorm';
 import { Blacklist } from '../blacklist/entities/blacklist.entity';
 import { CreateReportDto } from './dto/create-report.dto';
 import { Report } from './entities/report.entity';
@@ -72,12 +73,21 @@ export class ReportService {
     }
   }
 
-  async findAll() {
-    return await this.reportRep.find({
+  async findAll(take?: number, skip?: number) {
+    const options = {
       relations: { createdUser: true, blacklist: true },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC' as FindOptionsOrderValue },
       select: REPORT_SELECT,
-    });
+    };
+    if (take) Object.assign(options, { take });
+    if (skip) Object.assign(options, { skip });
+    const [data, total] = await this.reportRep.findAndCount(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
   }
 
   async findByUser(userId: string) {

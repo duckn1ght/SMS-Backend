@@ -33,8 +33,20 @@ export class WhitelistService {
     return { statusCode: 201, message: 'Номер успешно добавлен в Белый Список' };
   }
 
-  async get() {
-    return await this.whitelistRep.find({ select: WHITELIST_SELECT, relations: { createdUser: true } });
+  async get(take?: number, skip?: number) {
+    const options = {
+      relations: { createdUser: true, reports: true },
+      select: WHITELIST_SELECT,
+    };
+    if (take) Object.assign(options, { take });
+    if (skip) Object.assign(options, { skip });
+    const [data, total] = await this.whitelistRep.find(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
   }
 
   async getOrgs() {
@@ -42,11 +54,19 @@ export class WhitelistService {
   }
 
   async getOneByNumber(phone: string) {
-    return await this.whitelistRep.findOne({ where: { phone }, select: WHITELIST_SELECT, relations: { createdUser: true } });
+    return await this.whitelistRep.findOne({
+      where: { phone },
+      select: WHITELIST_SELECT,
+      relations: { createdUser: true },
+    });
   }
 
   async getOneById(id: string) {
-    return await this.whitelistRep.findOne({ where: { id }, select: WHITELIST_SELECT, relations: { createdUser: true } });
+    return await this.whitelistRep.findOne({
+      where: { id },
+      select: WHITELIST_SELECT,
+      relations: { createdUser: true },
+    });
   }
 
   async update(dto: UpdateWhitelistDto, id: string) {

@@ -18,11 +18,11 @@ export class ProfileController {
     return await this.profileService.findOneById(r.user.id);
   }
 
-  @Get(':id')
-  @UseGuards(WebJwtGuard)
-  async byId(@Param('id') id: string) {
-    return await this.profileService.findOneById(id);
-  }
+  // @Get(':id')
+  // @UseGuards(WebJwtGuard)
+  // async byId(@Param('id') id: string) {
+  //   return await this.profileService.findOneById(id);
+  // }
 
   @Delete()
   @UseGuards(UniversalJwtGuard)

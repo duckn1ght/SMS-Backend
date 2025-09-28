@@ -18,7 +18,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class AdminService {
   constructor(
     @InjectRepository(User)
-    private readonly userRed: Repository<User>,
+    private readonly userRep: Repository<User>,
     @InjectRepository(SmsBanWord)
     private readonly banWordRepo: Repository<SmsBanWord>,
     private logService: ActionLogService,
@@ -26,7 +26,7 @@ export class AdminService {
 
   @CatchErrors()
   async createUser(dto: CreateUserDto, r: JwtReq) {
-    const existedUser = await this.userRed.findOne({
+    const existedUser = await this.userRep.findOne({
       where: { email: dto.email },
       select: { id: true },
     });
@@ -35,7 +35,7 @@ export class AdminService {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const platform = dto.role === USER_ROLE.USER ? CLIENT_TYPE.ANDROID : CLIENT_TYPE.WEB;
     console.log(platform);
-    await this.userRed.save({
+    await this.userRep.save({
       email: dto.email,
       name: dto.name,
       password: hashedPassword,
@@ -53,19 +53,33 @@ export class AdminService {
   }
 
   @CatchErrors()
-  async getUsers() {
-    return await this.userRed.find({ select: USER_SELECT });
+  async getUsers(take?: number, skip?: number) {
+    const options: any = { select: USER_SELECT };
+    if (typeof take === 'number') options.take = take;
+    if (typeof skip === 'number') options.skip = skip;
+    const [data, total] = await this.userRep.findAndCount(options);
+    return {
+      data,
+      take: take ?? total,
+      skip: skip ?? 0,
+      total,
+    };
+  }
+
+  @CatchErrors()
+  async getUserById(id: string) {
+    return await this.userRep.findOne({ where: { id }, select: USER_SELECT });
   }
 
   @CatchErrors()
   async updateUser(dto: UpdateUserDto, id: string, r: JwtReq) {
-    const existedUser = await this.userRed.findOne({
+    const existedUser = await this.userRep.findOne({
       where: { id },
       select: { id: true, name: true, email: true, role: true },
     });
     if (!existedUser) throw new HttpException('Пользователь не найден', 404);
-    
-    await this.userRed.update(id, dto);
+
+    await this.userRep.update(id, dto);
     await this.logService.createLog(
       {
         message: `Администратор ${r.user.name} обновил пользователя: ${existedUser.name}`,
@@ -90,11 +104,20 @@ export class AdminService {
   }
 
   @CatchErrors()
-  async getBanWords() {
-    return await this.banWordRepo.find({
+  async getBanWords(take?: number, skip?: number) {
+    const options: any = {
       relations: { createdUser: true },
       select: { createdAt: true, id: true, updatedAt: true, word: true, createdUser: USER_SELECT },
-    });
+    };
+    if (typeof take === 'number') options.take = take;
+    if (typeof skip === 'number') options.skip = skip;
+    const [data, total] = await this.banWordRepo.findAndCount(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
   }
 
   @CatchErrors()
@@ -112,5 +135,10 @@ export class AdminService {
       r.user.id,
     );
     return { statusCode: 204, message: 'Бан-слово удалено' };
+  }
+
+  @CatchErrors()
+  getLogs(take?: number, skip?: number) {
+    return this.logService.get(take, skip);
   }
 }

@@ -52,11 +52,20 @@ export class BlacklistService {
   }
 
   @CatchErrors()
-  async get() {
-    return await this.blacklistRep.find({
+  async get(take?: number, skip?: number) {
+    const options = {
       relations: { createdUser: true, reports: true },
       select: BLACKLIST_SELECT,
-    });
+    };
+    if (take) Object.assign(options, { take });
+    if (skip) Object.assign(options, { skip });
+    const [data, total] = await this.blacklistRep.findAndCount(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
   }
 
   @CatchErrors()

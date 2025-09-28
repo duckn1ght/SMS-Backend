@@ -31,16 +31,34 @@ export class AppealService {
     return { statusCode: 201, message: 'Обращение успешно создано' };
   }
 
-  async findAll() {
-    return await this.appealRepo.find();
+  async findAll(take?: number, skip?: number) {
+    const options = {};
+    if (take) Object.assign(options, { take });
+    if (skip) Object.assign(options, { skip });
+    const [data, total] = await this.appealRepo.find(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
   }
 
   async findOne(id: string) {
     return await this.appealRepo.findOne({ where: { id } });
   }
 
-  async findAllByUser(userId: string) {
-    return await this.appealRepo.find({ where: { createdUser: { id: userId } } });
+  async findAllByUser(userId: string, take?: number, skip?: number) {
+    const options = { where: { createdUser: { id: userId } } };
+    if (take) Object.assign(options, { take });
+    if (skip) Object.assign(options, { skip });
+    const [data, total] = await this.appealRepo.findAndCount(options);
+    return {
+      data,
+      total,
+      take,
+      skip
+    }
   }
 
   async remove(id: string, r: JwtReq) {

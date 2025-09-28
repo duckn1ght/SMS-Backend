@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Patch,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { WhitelistService } from './whitelist.service';
 import { CreateWhitelistDto } from './dto/create-whitelist.dto';
@@ -35,20 +36,14 @@ export class WhitelistController {
 
   @Get()
   @UseGuards(UniversalJwtGuard)
-  async get() {
-    return this.whitelistService.get();
+  async get(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.whitelistService.get(take, skip);
   }
 
   @Get('by-phone/:phone')
   @UseGuards(UniversalJwtGuard)
   async getOneByNumber(@Param('phone') phone: string) {
     return this.whitelistService.getOneByNumber(phone);
-  }
-
-  @Get('orgs')
-  @UseGuards(UniversalJwtGuard)
-  async getOrgs() {
-    return this.whitelistService.getOrgs();
   }
 
   @Get(':id')

@@ -11,7 +11,16 @@ export class UserService {
     private readonly userRep: Repository<User>,
   ) {}
 
-  async getPartners() {
-    return await this.userRep.find({ where: { role: USER_ROLE.PARTNER } });
+  async getPartners(take?: number, skip?: number) {
+    const options = { where: { role: USER_ROLE.PARTNER } };
+    if (take) Object.assign(options, { take });
+    if (skip) Object.assign(options, { skip });
+    const [data, total] = await this.userRep.findAndCount(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
   }
 }

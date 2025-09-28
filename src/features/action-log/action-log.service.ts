@@ -26,8 +26,12 @@ export class ActionLogService {
   }
 
   @CatchErrors()
-  async get() {
-    return await this.logRepo.find({ relations: { user: true }, select: ACTION_LOG_SELECT });
+  async get(take?: number, skip?: number) {
+    const options: any = { relations: { user: true }, select: ACTION_LOG_SELECT };
+    if (typeof take === 'number') options.take = take;
+    if (typeof skip === 'number') options.skip = skip;
+    const [data, total] = await this.logRepo.findAndCount(options);
+    return { data, total };
   }
 
   @CatchErrors()
@@ -40,17 +44,17 @@ export class ActionLogService {
   }
 
   @CatchErrors()
-  async getByUserId(userId: string) {
-    return await this.logRepo.find({
-      relations: { user: true },
-      select: ACTION_LOG_SELECT,
-      where: { user: { id: userId } },
-    });
+  async getByUserId(userId: string, take?: number, skip?: number) {
+    const options: any = { relations: { user: true }, select: ACTION_LOG_SELECT, where: { user: { id: userId } } };
+    if (typeof take === 'number') options.take = take;
+    if (typeof skip === 'number') options.skip = skip;
+    const [data, total] = await this.logRepo.findAndCount(options);
+    return { data, total };
   }
 
   @CatchErrors()
   async remove(id: string) {
     await this.logRepo.delete(id);
-    return {statusCode: 204, message: 'Лог успешно удален'}
+    return { statusCode: 204, message: 'Лог успешно удален' };
   }
 }

@@ -10,6 +10,7 @@ import {
   Patch,
   UseGuards,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { BlacklistService } from './blacklist.service';
 import { CreateBlacklistDto } from './dto/create-blacklist.dto';
@@ -35,8 +36,8 @@ export class BlacklistController {
 
   @Get()
   @UseGuards(UniversalJwtGuard)
-  async get() {
-    return this.blacklistService.get();
+  async get(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.blacklistService.get(take, skip);
   }
 
   @Get('by-phone/:phone')
