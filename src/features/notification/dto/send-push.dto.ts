@@ -13,9 +13,4 @@ export class SendPushDto {
   @IsString()
   @ApiProperty()
   body: string;
-
-  @IsOptional()
-  @IsObject()
-  @ApiProperty()
-  data?: Record<string, string>;
 }
