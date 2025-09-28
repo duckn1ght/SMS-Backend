@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Param, Body, Delete, Patch, Query, UseGuards, Req, HttpCode } from '@nestjs/common';
 import { AppealService } from './appeal.service';
 import { CreateAppealDto } from './dto/create-appeal.dto';
-import { NewStatusAppealDto } from './dto/new-status-appeal.dto';
+import { ResponseStatusAppealDto } from './dto/response-status-appeal.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AndroidJwtGuard } from '../auth/guards/android.guard';
 import { WebJwtGuard } from '../auth/guards/web.guard';
@@ -69,7 +69,7 @@ export class AppealController {
 
   @Patch(':id/status')
   @UseGuards(WebJwtGuard)
-  updateStatus(@Param('id') id: string, @Body() dto: NewStatusAppealDto, @Req() r: JwtReq) {
-    return this.appealService.updateStatus(id, dto, r);
+  updateStatus(@Param('id') id: string, @Body() dto: ResponseStatusAppealDto, @Req() r: JwtReq) {
+    return this.appealService.response(id, dto, r);
   }
 }

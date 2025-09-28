@@ -2,13 +2,15 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAppealDto } from './dto/create-appeal.dto';
-import { NewStatusAppealDto } from './dto/new-status-appeal.dto';
+import { ResponseStatusAppealDto } from './dto/response-status-appeal.dto';
 import { Appeal } from './entities/appeal.entity';
 import { UpdateAppealDto } from './dto/update-appeal.dto';
 import { User } from '../user/entities/user.entity';
 import { ActionLogService } from '../action-log/action-log.service';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
+import { NotificationService } from '../notification/notification.service';
+import { ResponseAppealNotificationText, ResponseAppealNotificationTitle } from 'src/const/notifications';
 
 @Injectable()
 export class AppealService {
@@ -18,6 +20,7 @@ export class AppealService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private logService: ActionLogService,
+    private notificationService: NotificationService,
   ) {}
 
   async create(dto: CreateAppealDto, r: JwtReq) {
@@ -57,8 +60,8 @@ export class AppealService {
       data,
       total,
       take,
-      skip
-    }
+      skip,
+    };
   }
 
   async remove(id: string, r: JwtReq) {
@@ -79,12 +82,15 @@ export class AppealService {
     return { statusCode: 200, message: 'Обращение успешно обновлено' };
   }
 
-  async updateStatus(id: string, dto: NewStatusAppealDto, r: JwtReq) {
+  async response(id: string, dto: ResponseStatusAppealDto, r: JwtReq) {
+    const appeal = await this.appealRepo.findOne({ where: { id }, relations: { createdUser: true } });
+    if (!appeal) throw new HttpException('Обращение не найдено', 404);
     await this.appealRepo.update(id, { status: dto.status });
     await this.logService.createLog(
-      { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} обновил статус обращения` },
+      { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} откликнулся обращения` },
       r.user.id,
     );
+    await this.notificationService.sendPush(appeal.createdUser.id, ResponseAppealNotificationTitle, ResponseAppealNotificationText);
     return { statusCode: 200, message: 'Статус обращения обновлён' };
   }
 }

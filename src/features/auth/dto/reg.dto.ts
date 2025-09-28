@@ -21,4 +21,9 @@ export class RegDto {
   @IsOptional()
   @ApiProperty()
   region?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  firebaseToken?: string;
 }

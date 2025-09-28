@@ -21,4 +21,9 @@ export class AuthDto {
   @ApiProperty()
   @IsEnum(CLIENT_TYPE)
   clientType: CLIENT_TYPE;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  firebaseToken?: string;
 }

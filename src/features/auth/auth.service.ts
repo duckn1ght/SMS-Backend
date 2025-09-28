@@ -37,6 +37,11 @@ export class AuthService {
     if (existedUser) {
       const isMatch = await bcrypt.compare(dto.password, existedUser.password);
       if (isMatch) {
+        if (existedUser.firebaseToken !== dto.firebaseToken) {
+          await this.userRep.update(existedUser.id, {
+            firebaseToken: dto.firebaseToken,
+          });
+        }
         await this.logService.createLog(
           {
             message: `Пользователь ${existedUser.name} авторизовался`,
@@ -66,6 +71,7 @@ export class AuthService {
       password: await bcrypt.hash(dto.password, 10),
       role: USER_ROLE.USER,
       clientType: CLIENT_TYPE.ANDROID,
+      firebaseToken: dto.firebaseToken,
     });
     await this.logService.createLog(
       {

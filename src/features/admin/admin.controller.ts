@@ -62,6 +62,20 @@ export class AdminController {
   }
 
   @UseGuards(WebJwtGuard)
+  @Patch('user/:id/ban')
+  banUser(@Req() r: JwtReq, @Param('id') id: string) {
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
+    return this.adminService.banUser(id);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Patch('user/:id/unban')
+  unbanUser(@Req() r: JwtReq, @Param('id') id: string) {
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
+    return this.adminService.banUser(id);
+  }
+
+  @UseGuards(WebJwtGuard)
   @Get('sms-ban-words')
   @ApiQuery({
     name: 'take',

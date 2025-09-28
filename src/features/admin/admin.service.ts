@@ -13,6 +13,8 @@ import type { JwtReq } from '../auth/types/jwtReq.type';
 import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { NotificationService } from '../notification/notification.service';
+import { BanNotificationText, BanNotificationTitle, UnbanNotificationText, UnbanNotificationTitle } from 'src/const/notifications';
 
 @Injectable()
 export class AdminService {
@@ -22,6 +24,7 @@ export class AdminService {
     @InjectRepository(SmsBanWord)
     private readonly banWordRepo: Repository<SmsBanWord>,
     private logService: ActionLogService,
+    private notificationService: NotificationService,
   ) {}
 
   @CatchErrors()
@@ -88,6 +91,32 @@ export class AdminService {
       r.user.id,
     );
     return { statusCode: 200, message: 'Пользователь успешно обновлен' };
+  }
+
+  @CatchErrors()
+  async banUser(id: string) {
+    const existedUser = await this.userRep.findOne({
+      where: { id },
+    });
+    if (!existedUser) throw new HttpException('Пользователь не найден', 404);
+    await this.userRep.update(existedUser.id, {
+      isActive: false,
+    });
+    await this.notificationService.sendPush(existedUser.id, BanNotificationTitle, BanNotificationText);
+    return { statusCode: 200, message: 'Пользователь успешно заблокирован' };
+  }
+
+  @CatchErrors()
+  async unbanUser(id: string) {
+    const existedUser = await this.userRep.findOne({
+      where: { id },
+    });
+    if (!existedUser) throw new HttpException('Пользователь не найден', 404);
+    await this.userRep.update(existedUser.id, {
+      isActive: true,
+    });
+    await this.notificationService.sendPush(existedUser.id, UnbanNotificationTitle, UnbanNotificationText);
+    return { statusCode: 200, message: 'Пользователь успешно разблокирован' };
   }
 
   @CatchErrors()

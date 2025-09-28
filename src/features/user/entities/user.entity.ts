@@ -40,6 +40,9 @@ export class User extends AbstractEntity<User> {
   @Column({ nullable: true })
   organization?: string;
 
+  @Column({nullable: true, name: 'firebase_token'})
+  firebaseToken?: string
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

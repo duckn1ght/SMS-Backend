@@ -43,6 +43,9 @@ export class Appeal extends AbstractEntity<Appeal> {
   status: APPEAL_STATUS;
 
   @Column({ nullable: true })
+  response?: string;
+
+  @Column({ nullable: true })
   iin?: string;
 
   @Column({ nullable: true })

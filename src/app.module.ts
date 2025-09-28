@@ -18,6 +18,7 @@ import { AppealModule } from './features/appeal/appeal.module';
 import { ActionLogModule } from './features/action-log/action-log.module';
 import { SmsModule } from './features/sms/sms.module';
 import { StatisticsModule } from './features/statistics/statistics.module';
+import { NotificationModule } from './features/notification/notification.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { StatisticsModule } from './features/statistics/statistics.module';
     ActionLogModule,
     SmsModule,
     StatisticsModule,
+    NotificationModule,
   ],
   controllers: [AppController],
 })
