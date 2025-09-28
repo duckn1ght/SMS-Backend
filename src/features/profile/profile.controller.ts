@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { JwtReq } from '../auth/types/jwtReq.type';
@@ -22,6 +22,12 @@ export class ProfileController {
   @UseGuards(WebJwtGuard)
   async byId(@Param('id') id: string) {
     return await this.profileService.findOneById(id);
+  }
+
+  @Delete()
+  @UseGuards(UniversalJwtGuard)
+  async delete(@Req() r: JwtReq) {
+    return await this.profileService.delete(r);
   }
 
   @Patch(':id')

@@ -48,4 +48,14 @@ export class ProfileService {
       throw new HttpException('Указан неверный старый пароль', 400);
     }
   }
+
+  @CatchErrors()
+  async delete(r: JwtReq) {
+    const existedUser = await this.userRep.findOne({
+      where: { id: r.user.id },
+    });
+    if (!existedUser) throw new HttpException('Пользователь по токену не найден', 404);
+    await this.userRep.remove(existedUser);
+    return { statusCode: 200, message: 'Пользователь успешно удален' };
+  }
 }
