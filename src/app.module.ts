@@ -19,6 +19,7 @@ import { ActionLogModule } from './features/action-log/action-log.module';
 import { SmsModule } from './features/sms/sms.module';
 import { StatisticsModule } from './features/statistics/statistics.module';
 import { NotificationModule } from './features/notification/notification.module';
+import { ImportModule } from './features/import/import.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { NotificationModule } from './features/notification/notification.module'
     SmsModule,
     StatisticsModule,
     NotificationModule,
+    ImportModule,
   ],
   controllers: [AppController],
 })
