@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegDto } from './dto/reg.dto';
 import { AuthDto } from './dto/auth.dto';
@@ -12,7 +12,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @HttpCode(200)
   async auth(@Body() dto: AuthDto) {
     return this.authService.auth(dto);
   }
@@ -22,6 +21,11 @@ export class AuthController {
   @ApiBody({ type: RegDto })
   async register(@Body() dto: RegDto) {
     return this.authService.registration(dto);
+  }
+
+  @Get('check/:phone')
+  async checkPhone(@Param('phone') phone: string) {
+    return this.authService.checkReg(phone);
   }
 
   // @ApiBearerAuth()

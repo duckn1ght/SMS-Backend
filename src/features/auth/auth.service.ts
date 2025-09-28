@@ -102,6 +102,12 @@ export class AuthService {
     return await this.jwtService.sign(payload, { secret, expiresIn });
   }
 
+  @CatchErrors()
+  async checkReg(phone: string) {
+    const phoneReg = await this.userRep.findOne({ where: { phone } });
+    return phoneReg ? true : false;
+  }
+
   #getJwtConfig(clientType: CLIENT_TYPE) {
     switch (clientType) {
       case CLIENT_TYPE.WEB:
