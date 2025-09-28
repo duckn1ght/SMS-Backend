@@ -35,12 +35,12 @@ export class WhitelistService {
 
   async get(take?: number, skip?: number) {
     const options = {
-      relations: { createdUser: true, reports: true },
+      relations: { createdUser: true },
       select: WHITELIST_SELECT,
     };
     if (take) Object.assign(options, { take });
     if (skip) Object.assign(options, { skip });
-    const [data, total] = await this.whitelistRep.find(options);
+    const [data, total] = await this.whitelistRep.findAndCount(options);
     return {
       data,
       total,

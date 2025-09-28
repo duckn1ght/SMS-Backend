@@ -17,7 +17,7 @@ import { CreateWhitelistDto } from './dto/create-whitelist.dto';
 import { UpdateWhitelistDto } from './dto/update-whitelist.dto';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { UniversalJwtGuard } from '../auth/guards/universal.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 
 @Controller('whitelist')
@@ -36,6 +36,14 @@ export class WhitelistController {
 
   @Get()
   @UseGuards(UniversalJwtGuard)
+  @ApiQuery({
+    name: 'take',
+    required: false
+  })
+    @ApiQuery({
+    name: 'skip',
+    required: false
+  })
   async get(@Query('take') take?: number, @Query('skip') skip?: number) {
     return this.whitelistService.get(take, skip);
   }

@@ -15,7 +15,7 @@ import {
 import { AdminService } from './admin.service';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -36,6 +36,14 @@ export class AdminController {
 
   @UseGuards(WebJwtGuard)
   @Get('users')
+  @ApiQuery({
+    name: 'take',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+  })
   getUsers(@Query('take') take?: number, @Query('skip') skip?: number) {
     return this.adminService.getUsers(take, skip);
   }
@@ -55,12 +63,28 @@ export class AdminController {
 
   @UseGuards(WebJwtGuard)
   @Get('sms-ban-words')
+  @ApiQuery({
+    name: 'take',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+  })
   getSmsBanWords(@Query('take') take?: number, @Query('skip') skip?: number) {
     return this.adminService.getBanWords(take, skip);
   }
 
   @UseGuards(WebJwtGuard)
   @Get('logs')
+  @ApiQuery({
+    name: 'take',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+  })
   getLogs(@Query('take') take?: number, @Query('skip') skip?: number) {
     return this.adminService.getLogs(take, skip);
   }

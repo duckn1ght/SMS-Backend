@@ -31,7 +31,7 @@ export class ActionLogService {
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
     const [data, total] = await this.logRepo.findAndCount(options);
-    return { data, total };
+    return { data, total, take, skip };
   }
 
   @CatchErrors()
@@ -49,7 +49,7 @@ export class ActionLogService {
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
     const [data, total] = await this.logRepo.findAndCount(options);
-    return { data, total };
+    return { data, total, take, skip };
   }
 
   @CatchErrors()

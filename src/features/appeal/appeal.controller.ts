@@ -2,7 +2,7 @@ import { Controller, Post, Get, Param, Body, Delete, Patch, Query, UseGuards, Re
 import { AppealService } from './appeal.service';
 import { CreateAppealDto } from './dto/create-appeal.dto';
 import { NewStatusAppealDto } from './dto/new-status-appeal.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AndroidJwtGuard } from '../auth/guards/android.guard';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import { UniversalJwtGuard } from '../auth/guards/universal.guard';
@@ -24,11 +24,19 @@ export class AppealController {
 
   @Get()
   @UseGuards(WebJwtGuard)
+  @ApiQuery({
+    name: 'take',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+  })
   findAll(@Query('skip') skip?: number, @Query('take') take?: number) {
     return this.appealService.findAll(take, skip);
   }
 
-  @Get('by-id:id')
+  @Get('by-id/:id')
   @UseGuards(UniversalJwtGuard)
   findOne(@Param('id') id: string) {
     return this.appealService.findOne(id);

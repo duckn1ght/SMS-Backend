@@ -24,10 +24,10 @@ export class AuthController {
     return this.authService.registration(dto);
   }
 
-  @ApiBearerAuth()
-  @Get('me')
-  @UseGuards(UniversalJwtGuard)
-  async me(@Req() r: JwtReq) {
-    return this.authService.me(r.user.id);
-  }
+  // @ApiBearerAuth()
+  // @Get('me')
+  // @UseGuards(UniversalJwtGuard)
+  // async me(@Req() r: JwtReq) {
+  //   return this.authService.me(r.user.id);
+  // }
 }

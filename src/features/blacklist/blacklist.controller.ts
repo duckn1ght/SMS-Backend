@@ -16,7 +16,7 @@ import { BlacklistService } from './blacklist.service';
 import { CreateBlacklistDto } from './dto/create-blacklist.dto';
 import { UpdateBlacklistDto } from './dto/update-blacklist.dto';
 import type { JwtReq } from '../auth/types/jwtReq.type';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { WebJwtGuard } from '../auth/guards/web.guard';
 import { UniversalJwtGuard } from '../auth/guards/universal.guard';
 
@@ -35,6 +35,14 @@ export class BlacklistController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'take',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+  })
   @UseGuards(UniversalJwtGuard)
   async get(@Query('take') take?: number, @Query('skip') skip?: number) {
     return this.blacklistService.get(take, skip);

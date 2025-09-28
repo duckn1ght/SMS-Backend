@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, Body, Req, UseGuards, Delete, HttpCode, Q
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import type { JwtReq } from '../auth/types/jwtReq.type';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AndroidJwtGuard } from '../auth/guards/android.guard';
 import { UniversalJwtGuard } from '../auth/guards/universal.guard';
 import { WebJwtGuard } from '../auth/guards/web.guard';
@@ -21,6 +21,14 @@ export class ReportController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'take',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+  })
   @UseGuards(WebJwtGuard)
   async findAll(@Query('take') take?: number, @Query('skip') skip?: number) {
     return this.reportService.findAll(take, skip);
