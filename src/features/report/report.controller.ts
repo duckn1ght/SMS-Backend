@@ -48,7 +48,7 @@ export class ReportController {
 
   @Delete(':id')
   @HttpCode(204)
-  @UseGuards(AndroidJwtGuard)
+  @UseGuards(UniversalJwtGuard)
   async remove(@Param() id: string, @Req() r: JwtReq) {
     await this.reportService.remove(id, r);
   }
