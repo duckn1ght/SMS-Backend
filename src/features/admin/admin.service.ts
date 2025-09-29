@@ -85,7 +85,7 @@ export class AdminService {
     });
     if (!existedUser) throw new HttpException('Пользователь не найден', 404);
 
-    await this.userRep.update(id, dto);
+    await this.userRep.update(id, {...dto, region: dto.city});
     await this.logService.createLog(
       {
         message: `Администратор ${r.user.name} обновил пользователя: ${existedUser.name}`,
