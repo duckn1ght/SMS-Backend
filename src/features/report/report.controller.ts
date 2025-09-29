@@ -14,7 +14,7 @@ export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
   @Post()
-  @UseGuards(AndroidJwtGuard)
+  @UseGuards(UniversalJwtGuard)
   @HttpCode(201)
   async create(@Body() dto: CreateReportDto, @Req() req: JwtReq) {
     return this.reportService.create(dto, req);
@@ -49,7 +49,7 @@ export class ReportController {
   @Delete(':id')
   @HttpCode(204)
   @UseGuards(UniversalJwtGuard)
-  async remove(@Param() id: string, @Req() r: JwtReq) {
+  async remove(@Param('id') id: string, @Req() r: JwtReq) {
     await this.reportService.remove(id, r);
   }
 }
