@@ -15,6 +15,8 @@ export const USER_SELECT: FindOptionsSelect<User> = {
   organization: true,
   position: true,
   isActive: true,
+  email: true,
+  region: true,
 };
 
 export const BLACKLIST_SELECT: FindOptionsSelect<Blacklist> = {
