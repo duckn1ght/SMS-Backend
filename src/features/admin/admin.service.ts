@@ -44,6 +44,9 @@ export class AdminService {
       password: hashedPassword,
       role: dto.role,
       clientType: platform,
+      organization: dto.organization || '',
+      position: dto.position || "",
+      city: dto.city || ""
     });
     await this.logService.createLog(
       {
