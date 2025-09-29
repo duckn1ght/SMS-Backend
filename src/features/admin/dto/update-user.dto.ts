@@ -21,7 +21,7 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  city?: string;
+  region?: string;
 
   @ApiProperty()
   @IsOptional()
