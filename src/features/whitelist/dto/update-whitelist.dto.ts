@@ -1,9 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class UpdateWhitelistDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   organization: string;
+
+  @IsPhoneNumber()
+  @IsOptional()
+  @ApiProperty()
+  phone: string;
 }
