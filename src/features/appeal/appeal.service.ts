@@ -38,7 +38,7 @@ export class AppealService {
     const options = {};
     if (take) Object.assign(options, { take });
     if (skip) Object.assign(options, { skip });
-    const [data, total] = await this.appealRepo.find(options);
+    const [data, total] = await this.appealRepo.findAndCount(options);
     return {
       data,
       total,
