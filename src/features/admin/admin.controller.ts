@@ -38,16 +38,25 @@ export class AdminController {
 
   @UseGuards(WebJwtGuard)
   @Get('users')
-  @ApiQuery({
-    name: 'take',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'skip',
-    required: false,
-  })
-  getUsers(@Query('take') take?: number, @Query('skip') skip?: number) {
-    return this.adminService.getUsers(take, skip);
+  @ApiQuery({ name: 'take', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'search', required: false, description: 'Поиск по номеру, email или имени' })
+  @ApiQuery({ name: 'role', required: false })
+  @ApiQuery({ name: 'organization', required: false })
+  @ApiQuery({ name: 'region', required: false })
+  @ApiQuery({ name: 'orderBy', required: false })
+  @ApiQuery({ name: 'orderDir', required: false })
+  getUsers(
+    @Query('take') take?: number,
+    @Query('skip') skip?: number,
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('organization') organization?: string,
+    @Query('region') region?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('orderDir') orderDir?: 'ASC' | 'DESC',
+  ) {
+    return this.adminService.getUsers(take, skip, { search, role, organization, region }, { orderBy, orderDir });
   }
 
   @UseGuards(WebJwtGuard)

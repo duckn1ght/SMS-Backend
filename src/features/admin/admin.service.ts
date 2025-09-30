@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, Repository, ILike } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { CLIENT_TYPE, USER_ROLE } from '../user/types/user.types';
@@ -69,10 +69,49 @@ export class AdminService {
   }
 
   @CatchErrors()
-  async getUsers(take?: number, skip?: number) {
+  async getUsers(
+    take?: number,
+    skip?: number,
+    filters?: { search?: string; role?: string; organization?: string; region?: string },
+    order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' },
+  ) {
     const options: FindManyOptions<User> = { select: USER_SELECT };
+
+    // Поиск по номеру, email или имени
+    if (filters?.search) {
+      const search = filters.search;
+      options.where = [
+        { phone: ILike(`%${search}%`) },
+        { email: ILike(`%${search}%`) },
+        { name: ILike(`%${search}%`) },
+      ];
+      // Добавляем фильтры к каждому условию поиска
+      if (filters.role || filters.organization || filters.region) {
+        options.where = (options.where as FindManyOptions<User>[]).map((w) => ({
+          ...w,
+          ...(filters.role && { role: filters.role as USER_ROLE }),
+          ...(filters.organization && { organization: filters.organization }),
+          ...(filters.region && { region: filters.region }),
+        }));
+      }
+    } else {
+      // Обычные фильтры без поиска
+      options.where = {};
+      if (filters?.role) (options.where as any).role = filters.role;
+      if (filters?.organization) (options.where as any).organization = filters.organization;
+      if (filters?.region) (options.where as any).region = filters.region;
+    }
+
+    // Сортировка
+    if (order?.orderBy) {
+      options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+    } else {
+      options.order = { createdAt: 'DESC' };
+    }
+
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
+
     const [data, total] = await this.userRep.findAndCount(options);
     return {
       data,
