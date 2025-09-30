@@ -305,6 +305,16 @@ export class StatisticsService {
     return buffer;
   }
 
+  async getAllRegions() {
+    const regions = await this.userRepo
+      .createQueryBuilder('user')
+      .select('DISTINCT user.region', 'region')
+      .where('user.region IS NOT NULL')
+      .getRawMany();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return regions.map((r) => r.region);
+  }
+
   #fromRoleToRussianString(role: USER_ROLE): string {
     switch (role) {
       case USER_ROLE.ADMIN:

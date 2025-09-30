@@ -36,4 +36,10 @@ export class StatisticsController {
     });
     res.send(buffer);
   }
+
+  @Get('regions')
+  @UseGuards(WebJwtGuard)
+  async getAllRegions() {
+    return this.statisticsService.getAllRegions();
+  }
 }
