@@ -90,7 +90,11 @@ export class AppealService {
       { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} откликнулся обращения` },
       r.user.id,
     );
-    await this.notificationService.sendPush(appeal.createdUser.id, ResponseAppealNotificationTitle, ResponseAppealNotificationText);
+    await this.notificationService.sendPush(
+      appeal.createdUser.id,
+      ResponseAppealNotificationTitle,
+      ResponseAppealNotificationText,
+    );
     return { statusCode: 200, message: 'Статус обращения обновлён' };
   }
 }

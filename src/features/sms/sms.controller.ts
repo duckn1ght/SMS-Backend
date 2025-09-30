@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { SmsService } from './sms.service';
 import { CheckSmsDto } from './dto/check-sms.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';

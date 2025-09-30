@@ -209,7 +209,7 @@ export class StatisticsService {
     sheet.getCell(`A${rowIdx}`).font = { bold: true };
     rowIdx++;
     stats.appealsByStatus.forEach((row: any) => {
-      const russianStatus = this.#fromAppealStatusToRussianString(row.status);
+      const russianStatus = this.#fromAppealStatusToRussianString(row.status as APPEAL_STATUS);
       sheet.getCell(`A${rowIdx}`).value = russianStatus;
       sheet.getCell(`B${rowIdx}`).value = Number(row.count);
       sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
@@ -238,7 +238,7 @@ export class StatisticsService {
     sheet.getCell(`A${rowIdx}`).alignment = { horizontal: 'center' };
     rowIdx++;
     stats.blacklistByGroup.forEach((row: any) => {
-      const russianRole = this.#fromRoleToRussianString(row.role);
+      const russianRole = this.#fromRoleToRussianString(row.role as USER_ROLE);
       sheet.getCell(`A${rowIdx}`).value = russianRole;
       sheet.getCell(`B${rowIdx}`).value = Number(row.count);
       sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
@@ -254,7 +254,7 @@ export class StatisticsService {
 
     rowIdx++;
     stats.whitelistByGroup.forEach((row: any) => {
-      const russianRole = this.#fromRoleToRussianString(row.role);
+      const russianRole = this.#fromRoleToRussianString(row.role as USER_ROLE);
       sheet.getCell(`A${rowIdx}`).value = russianRole;
       sheet.getCell(`B${rowIdx}`).value = Number(row.count);
       sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };

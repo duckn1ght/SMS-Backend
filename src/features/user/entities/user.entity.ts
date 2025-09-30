@@ -25,7 +25,7 @@ export class User extends AbstractEntity<User> {
   @Column({ name: 'client_type' })
   clientType: CLIENT_TYPE;
 
-  @Column({name: 'is_active', default: true})
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
   @Column({ nullable: true })
@@ -40,8 +40,8 @@ export class User extends AbstractEntity<User> {
   @Column({ nullable: true })
   organization?: string;
 
-  @Column({nullable: true, name: 'firebase_token'})
-  firebaseToken?: string
+  @Column({ nullable: true, name: 'firebase_token' })
+  firebaseToken?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -66,4 +66,7 @@ export class User extends AbstractEntity<User> {
 
   @OneToMany(() => SmsBanWord, (s) => s.createdUser)
   smsBanWords: SmsBanWord[];
+
+  @OneToMany(() => SmsBanWord, (s) => s.createdUser)
+  createdSmsTemplates: SmsBanWord[];
 }

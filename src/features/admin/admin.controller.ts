@@ -19,6 +19,8 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateSmsTemplateDto } from './dto/create-sms-template.dto';
+import { UpdateSmsTemplateDto } from './dto/update-sms-template.dto';
 
 @ApiBearerAuth()
 @ApiTags('Админ Панель')
@@ -115,5 +117,35 @@ export class AdminController {
   @Delete('sms-ban-words/:id')
   delete(@Req() r: JwtReq, @Body('id') id: string) {
     return this.adminService.removeBanWord(id, r);
+  }
+  @UseGuards(WebJwtGuard)
+  @HttpCode(201)
+  @Post('sms-template')
+  createSmsTemplate(@Req() r: JwtReq, @Body() dto: CreateSmsTemplateDto) {
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
+    return this.adminService.createSmsTemplate(dto, r);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Get('sms-templates')
+  @ApiQuery({ name: 'take', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  getSmsTemplates(@Query('take') take?: number, @Query('skip') skip?: number) {
+    return this.adminService.getSmsTemplates(take, skip);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Patch('sms-template/:id')
+  updateSmsTemplate(@Param('id') id: string, @Body() dto: UpdateSmsTemplateDto, @Req() r: JwtReq) {
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
+    return this.adminService.updateSmsTemplate(id, dto, r);
+  }
+
+  @UseGuards(WebJwtGuard)
+  @Delete('sms-template/:id')
+  @HttpCode(204)
+  deleteSmsTemplate(@Param('id') id: string, @Req() r: JwtReq) {
+    if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
+    return this.adminService.removeSmsTemplate(id, r);
   }
 }

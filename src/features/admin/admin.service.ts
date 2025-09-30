@@ -1,11 +1,11 @@
-import { Catch, HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { CLIENT_TYPE, USER_ROLE } from '../user/types/user.types';
-import { USER_SELECT } from 'src/const/selects';
+import { SMS_TEMPLATE_SELECT, USER_SELECT } from 'src/const/selects';
 import { CatchErrors } from 'src/const/check.decorator';
 import { ActionLogService } from '../action-log/action-log.service';
 import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
@@ -14,7 +14,15 @@ import { CreateSmsBanWordDto } from './dto/create-sms-ban-word.dto';
 import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NotificationService } from '../notification/notification.service';
-import { BanNotificationText, BanNotificationTitle, UnbanNotificationText, UnbanNotificationTitle } from 'src/const/notifications';
+import {
+  BanNotificationText,
+  BanNotificationTitle,
+  UnbanNotificationText,
+  UnbanNotificationTitle,
+} from 'src/const/notifications';
+import { SmsTemplate } from '../sms/entities/sms-template.entity';
+import { CreateSmsTemplateDto } from './dto/create-sms-template.dto';
+import { UpdateSmsTemplateDto } from './dto/update-sms-template.dto';
 
 @Injectable()
 export class AdminService {
@@ -23,6 +31,8 @@ export class AdminService {
     private readonly userRep: Repository<User>,
     @InjectRepository(SmsBanWord)
     private readonly banWordRepo: Repository<SmsBanWord>,
+    @InjectRepository(SmsTemplate)
+    private readonly smsTemplateRepo: Repository<SmsTemplate>,
     private logService: ActionLogService,
     private notificationService: NotificationService,
   ) {}
@@ -45,8 +55,8 @@ export class AdminService {
       role: dto.role,
       clientType: platform,
       organization: dto.organization || '',
-      position: dto.position || "",
-      region: dto.city || ""
+      position: dto.position || '',
+      region: dto.city || '',
     });
     await this.logService.createLog(
       {
@@ -60,7 +70,7 @@ export class AdminService {
 
   @CatchErrors()
   async getUsers(take?: number, skip?: number) {
-    const options: any = { select: USER_SELECT };
+    const options: FindManyOptions<User> = { select: USER_SELECT };
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
     const [data, total] = await this.userRep.findAndCount(options);
@@ -137,7 +147,7 @@ export class AdminService {
 
   @CatchErrors()
   async getBanWords(take?: number, skip?: number) {
-    const options: any = {
+    const options: FindManyOptions<SmsBanWord> = {
       relations: { createdUser: true },
       select: { createdAt: true, id: true, updatedAt: true, word: true, createdUser: USER_SELECT },
     };
@@ -172,5 +182,69 @@ export class AdminService {
   @CatchErrors()
   getLogs(take?: number, skip?: number) {
     return this.logService.get(take, skip);
+  }
+
+  @CatchErrors()
+  async createSmsTemplate(dto: CreateSmsTemplateDto, r: JwtReq) {
+    const template = await this.smsTemplateRepo.save({
+      text: dto.text,
+      status: dto.status,
+      createdUser: { id: r.user.id },
+    });
+    await this.logService.createLog(
+      {
+        message: `Администратор ${r.user.name} создал новый SMS шаблон ${template.fakeId}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { statusCode: 201, message: 'SMS шаблон успешно создан' };
+  }
+
+  @CatchErrors()
+  async getSmsTemplates(take?: number, skip?: number) {
+    const options: FindManyOptions<SmsTemplate> = {
+      relations: { createdUser: true },
+      select: SMS_TEMPLATE_SELECT,
+    };
+    if (typeof take === 'number') options.take = take;
+    if (typeof skip === 'number') options.skip = skip;
+    const [data, total] = await this.smsTemplateRepo.findAndCount(options);
+    return {
+      data,
+      total,
+      take,
+      skip,
+    };
+  }
+
+  @CatchErrors()
+  async updateSmsTemplate(id: string, dto: UpdateSmsTemplateDto, r: JwtReq) {
+    const existed = await this.smsTemplateRepo.findOneBy({ id });
+    if (!existed) throw new HttpException('SMS шаблон с таким ID не найден', 404);
+    await this.smsTemplateRepo.update(id, dto);
+    await this.logService.createLog(
+      {
+        message: `Администратор ${r.user.name} обновил SMS шаблон ${existed.fakeId}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { statusCode: 200, message: 'SMS шаблон успешно обновлен' };
+  }
+
+  @CatchErrors()
+  async removeSmsTemplate(id: string, r: JwtReq) {
+    const existed = await this.smsTemplateRepo.findOneBy({ id });
+    if (!existed) throw new HttpException('SMS шаблон с таким ID не найден', 404);
+    await this.smsTemplateRepo.remove(existed);
+    await this.logService.createLog(
+      {
+        message: `Администратор ${r.user.name} удалил SMS шаблон ${existed.fakeId}`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      r.user.id,
+    );
+    return { statusCode: 204, message: 'SMS шаблон успешно удален' };
   }
 }

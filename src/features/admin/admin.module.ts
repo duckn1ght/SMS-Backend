@@ -6,9 +6,10 @@ import { User } from '../user/entities/user.entity';
 import { ActionLogModule } from '../action-log/action-log.module';
 import { SmsBanWord } from '../sms/entities/sms-ban-word.entity';
 import { NotificationModule } from '../notification/notification.module';
+import { SmsTemplate } from '../sms/entities/sms-template.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, SmsBanWord]), ActionLogModule, NotificationModule],
+  imports: [TypeOrmModule.forFeature([User, SmsBanWord, SmsTemplate]), ActionLogModule, NotificationModule],
   controllers: [AdminController],
   providers: [AdminService],
 })
