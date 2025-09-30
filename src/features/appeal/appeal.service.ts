@@ -39,15 +39,36 @@ export class AppealService {
   async findAll(
     take?: number,
     skip?: number,
-    filters?: { status?: APPEAL_STATUS; region?: string; role?: USER_ROLE; fakeId?: number },
+    filters?: { status?: APPEAL_STATUS; region?: string; role?: USER_ROLE; search?: string },
     order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' },
   ) {
     const options: FindManyOptions<Appeal> = {};
     options.where = {};
     if (filters?.status) options.where.status = filters.status;
-    if (filters?.fakeId) options.where.fakeId = Number(filters.fakeId);
-    if (filters?.region) options.where.createdUser = { region: filters.region };
-    if (filters?.role) options.where.createdUser = { role: filters.role };
+    // Поиск по номеру или fakeId через search
+    if (filters?.search) {
+      const isNumeric = /^\d+$/.test(filters.search);
+      const isInt32 = isNumeric && Number(filters.search) <= 2147483647;
+      if (isInt32) {
+        options.where = [{ fakeId: Number(filters.search) }, { phone: filters.search }, { userPhone: filters.search }];
+      } else {
+        options.where = [{ phone: filters.search }, { userPhone: filters.search }];
+      }
+    }
+    if (filters?.region) {
+      if (Array.isArray(options.where)) {
+        options.where = options.where.map((w) => ({ ...w, createdUser: { region: filters.region } }));
+      } else {
+        options.where.createdUser = { region: filters.region };
+      }
+    }
+    if (filters?.role) {
+      if (Array.isArray(options.where)) {
+        options.where = options.where.map((w) => ({ ...w, createdUser: { role: filters.role } }));
+      } else {
+        options.where.createdUser = { role: filters.role };
+      }
+    }
 
     if (order?.orderBy) {
       options.order = { [order.orderBy]: order.orderDir || 'DESC' };

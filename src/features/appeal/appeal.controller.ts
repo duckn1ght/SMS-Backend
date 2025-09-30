@@ -28,7 +28,7 @@ export class AppealController {
   @UseGuards(WebJwtGuard)
   @ApiQuery({ name: 'take', required: false })
   @ApiQuery({ name: 'skip', required: false })
-  @ApiQuery({ name: 'fakeId', required: false })
+  @ApiQuery({ name: 'search', required: false, description: 'Поиск по номеру или fakeId' })
   @ApiQuery({ name: 'status', required: false, default: 'new' })
   @ApiQuery({ name: 'region', required: false, default: 'Павлодарская область' })
   @ApiQuery({ name: 'role', required: false, default: 'USER' })
@@ -37,21 +37,21 @@ export class AppealController {
   findAll(
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('search') search?: string,
     @Query('status') status?: APPEAL_STATUS,
     @Query('region') region?: string,
     @Query('role') role?: USER_ROLE,
     @Query('orderBy') orderBy?: string,
     @Query('orderDir') orderDir?: 'ASC' | 'DESC',
-    @Query('fakeId') fakeId?: number,
   ) {
     return this.appealService.findAll(
       take,
       skip,
       {
-        status: status, // если нужны строгие типы, можно добавить проверку
+        status,
         region,
-        role: role,
-        fakeId,
+        role,
+        search,
       },
       { orderBy, orderDir },
     );
