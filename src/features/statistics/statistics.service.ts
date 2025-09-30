@@ -39,11 +39,13 @@ export class StatisticsService {
     period?: 'day' | 'week' | 'month' | 'year';
     region?: string;
     appealType?: string;
+    appealStatus?: string;
   }) {
     // Подготавливаем условия фильтрации
     const dateConditions = this.buildDateConditions(filters);
     const regionCondition = filters?.region ? `user.region = :region` : '';
     const appealTypeCondition = filters?.appealType ? `appeal.type = :appealType` : '';
+    const appealStatusCondition = filters?.appealStatus ? `appeal.status = :appealStatus` : '';
 
     // 1. Количество обращений по статусам
     let appealsByStatusQuery = this.appealRepo
@@ -60,6 +62,11 @@ export class StatisticsService {
     }
     if (appealTypeCondition) {
       appealsByStatusQuery = appealsByStatusQuery.andWhere(appealTypeCondition, { appealType: filters?.appealType });
+    }
+    if (appealStatusCondition) {
+      appealsByStatusQuery = appealsByStatusQuery.andWhere(appealStatusCondition, {
+        appealStatus: filters?.appealStatus,
+      });
     }
 
     const appealsByStatus = await appealsByStatusQuery.groupBy('appeal.status').getRawMany();
@@ -80,8 +87,88 @@ export class StatisticsService {
     if (appealTypeCondition) {
       appealsByRegionQuery = appealsByRegionQuery.andWhere(appealTypeCondition, { appealType: filters?.appealType });
     }
+    if (appealStatusCondition) {
+      appealsByRegionQuery = appealsByRegionQuery.andWhere(appealStatusCondition, {
+        appealStatus: filters?.appealStatus,
+      });
+    }
 
     const appealsByRegion = await appealsByRegionQuery.groupBy('user.region').getRawMany();
+
+    // 6. Динамика обращений по месяцам за последние 6 месяцев
+    let appealsDynamicsQuery = this.appealRepo
+      .createQueryBuilder('appeal')
+      .leftJoin('appeal.createdUser', 'user')
+      .select("TO_CHAR(appeal.createdAt, 'YYYY-MM') AS month")
+      .addSelect('appeal.status', 'status')
+      .addSelect('COUNT(*)', 'count');
+
+    // Применяем временной фильтр - либо кастомный, либо последние 6 месяцев
+    if (dateConditions) {
+      appealsDynamicsQuery = appealsDynamicsQuery.where(dateConditions);
+    } else {
+      appealsDynamicsQuery = appealsDynamicsQuery.where("appeal.createdAt >= NOW() - INTERVAL '6 months'");
+    }
+
+    // Применяем остальные фильтры
+    if (regionCondition) {
+      appealsDynamicsQuery = appealsDynamicsQuery.andWhere(regionCondition, { region: filters?.region });
+    }
+    if (appealTypeCondition) {
+      appealsDynamicsQuery = appealsDynamicsQuery.andWhere(appealTypeCondition, { appealType: filters?.appealType });
+    }
+    if (appealStatusCondition) {
+      appealsDynamicsQuery = appealsDynamicsQuery.andWhere(appealStatusCondition, {
+        appealStatus: filters?.appealStatus,
+      });
+    }
+
+    const appealsDynamicsRaw = await appealsDynamicsQuery
+      .groupBy('month')
+      .addGroupBy('appeal.status')
+      .orderBy('month', 'ASC')
+      .addOrderBy('appeal.status', 'ASC')
+      .getRawMany();
+
+    // Преобразуем в упрощенную структуру
+    const appealsDynamicsMap = new Map();
+
+    // Группируем по месяцам
+    appealsDynamicsRaw.forEach((row: any) => {
+      const month = row.month;
+      if (!appealsDynamicsMap.has(month)) {
+        appealsDynamicsMap.set(month, {
+          month,
+          new: 0,
+          inProccess: 0,
+          done: 0,
+          blocked: 0,
+          total: 0,
+        });
+      }
+
+      const monthData = appealsDynamicsMap.get(month);
+      const count = Number(row.count);
+
+      switch (row.status) {
+        case 'new':
+          monthData.new = count;
+          break;
+        case 'inProcess':
+          monthData.inProccess = count;
+          break;
+        case 'done':
+          monthData.done = count;
+          break;
+        case 'blocked':
+          monthData.blocked = count;
+          break;
+      }
+
+      monthData.total += count;
+    });
+
+    const appealsDynamics = Array.from(appealsDynamicsMap.values());
 
     // 3. Количество номеров в ЧС/БС по группам пользователей
     let blacklistByGroupQuery = this.blacklistRepo
@@ -188,6 +275,7 @@ export class StatisticsService {
       whitelistMonth,
       detectedPhonesCount,
       detectedSmsCount,
+      appealsDynamics,
       activeUsers: this.statisticsGateway.activeUsers.size,
     };
   }
@@ -270,6 +358,36 @@ export class StatisticsService {
     doc.text(` ${stats.detectedSmsCount}`, { align: 'right' });
     doc.font('Cyrillic').fontSize(12).text(`Активных пользователей на момент создания отчета:`, { continued: true });
     doc.text(` ${stats.activeUsers}`, { align: 'right' });
+    doc.moveDown(0.7);
+
+    // Динамика обращений по месяцам
+    doc.font('Cyrillic').fontSize(13).text('Динамика обращений по месяцам');
+    doc.moveDown(0.3);
+
+    // Выводим данные по каждому месяцу
+    stats.appealsDynamics.forEach((monthData: any) => {
+      const date = new Date(monthData.month + '-01');
+      const monthName = date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' });
+
+      doc.font('Cyrillic').fontSize(12).text(`${monthName}:`);
+
+      doc.font('Cyrillic').fontSize(11).text(`  Новое:`, { continued: true, indent: 20 });
+      doc.text(` ${monthData.new}`, { align: 'right' });
+
+      doc.font('Cyrillic').fontSize(11).text(`  В процессе:`, { continued: true, indent: 20 });
+      doc.text(` ${monthData.inProccess}`, { align: 'right' });
+
+      doc.font('Cyrillic').fontSize(11).text(`  Завершено:`, { continued: true, indent: 20 });
+      doc.text(` ${monthData.done}`, { align: 'right' });
+
+      doc.font('Cyrillic').fontSize(11).text(`  Заблокировано:`, { continued: true, indent: 20 });
+      doc.text(` ${monthData.blocked}`, { align: 'right' });
+
+      doc.font('Cyrillic').fontSize(11).text(`  Всего:`, { continued: true, indent: 20 });
+      doc.text(` ${monthData.total}`, { align: 'right' });
+
+      doc.moveDown(0.3);
+    });
 
     doc.end();
     return await new Promise<Buffer>((resolve) => {
@@ -398,6 +516,51 @@ export class StatisticsService {
     sheet.getCell(`A${rowIdx}`).value = 'Активных пользователей на момент создания отчета';
     sheet.getCell(`B${rowIdx}`).value = stats.activeUsers;
     sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+    rowIdx += 2;
+
+    // Динамика обращений по месяцам
+    sheet.mergeCells(`A${rowIdx}:B${rowIdx}`);
+    sheet.getCell(`A${rowIdx}`).value = 'Динамика обращений по месяцам';
+    sheet.getCell(`A${rowIdx}`).font = { bold: true };
+    sheet.getCell(`A${rowIdx}`).alignment = { horizontal: 'center' };
+    rowIdx++;
+
+    // Выводим данные по каждому месяцу
+    stats.appealsDynamics.forEach((monthData: any) => {
+      const date = new Date(monthData.month + '-01');
+      const monthName = date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' });
+
+      sheet.mergeCells(`A${rowIdx}:B${rowIdx}`);
+      sheet.getCell(`A${rowIdx}`).value = monthName;
+      sheet.getCell(`A${rowIdx}`).font = { bold: true };
+      rowIdx++;
+
+      sheet.getCell(`A${rowIdx}`).value = 'Новое';
+      sheet.getCell(`B${rowIdx}`).value = monthData.new;
+      sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+      rowIdx++;
+
+      sheet.getCell(`A${rowIdx}`).value = 'В процессе';
+      sheet.getCell(`B${rowIdx}`).value = monthData.inProccess;
+      sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+      rowIdx++;
+
+      sheet.getCell(`A${rowIdx}`).value = 'Завершено';
+      sheet.getCell(`B${rowIdx}`).value = monthData.done;
+      sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+      rowIdx++;
+
+      sheet.getCell(`A${rowIdx}`).value = 'Заблокировано';
+      sheet.getCell(`B${rowIdx}`).value = monthData.blocked;
+      sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+      rowIdx++;
+
+      sheet.getCell(`A${rowIdx}`).value = 'Всего';
+      sheet.getCell(`B${rowIdx}`).value = monthData.total;
+      sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+      sheet.getCell(`A${rowIdx}`).font = { bold: true };
+      rowIdx += 2;
+    });
 
     // Автоширина столбцов
     sheet.columns = [
@@ -439,6 +602,9 @@ export class StatisticsService {
     startDate?: string;
     endDate?: string;
     period?: 'day' | 'week' | 'month' | 'year';
+    region?: string;
+    appealType?: string;
+    appealStatus?: string;
   }): string | null {
     if (filters?.startDate && filters?.endDate) {
       return `appeal.createdAt BETWEEN '${filters.startDate}' AND '${filters.endDate}'`;
