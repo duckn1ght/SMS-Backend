@@ -1,7 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
-import type { FindOptionsOrder, FindOptionsOrderValue } from 'typeorm';
+import { Repository, DataSource, FindManyOptions, ILike } from 'typeorm';
 import { Blacklist } from '../blacklist/entities/blacklist.entity';
 import { CreateReportDto } from './dto/create-report.dto';
 import { Report } from './entities/report.entity';
@@ -73,14 +72,60 @@ export class ReportService {
     }
   }
 
-  async findAll(take?: number, skip?: number) {
-    const options = {
+  async findAll(
+    take?: number,
+    skip?: number,
+    filters?: { search?: string; role?: string; region?: string },
+    order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' },
+  ) {
+    const options: FindManyOptions<Report> = {
       relations: { createdUser: true, blacklist: true },
-      order: { createdAt: 'DESC' as FindOptionsOrderValue },
       select: REPORT_SELECT,
     };
-    if (take) Object.assign(options, { take });
-    if (skip) Object.assign(options, { skip });
+
+    // Поиск по fakeId или номеру создателя
+    if (filters?.search) {
+      const isNumeric = /^\d+$/.test(filters.search);
+      const isInt32 = isNumeric && Number(filters.search) <= 2147483647;
+
+      if (isInt32) {
+        options.where = [{ fakeId: Number(filters.search) }, { createdUser: { phone: ILike(`%${filters.search}%`) } }];
+      } else {
+        options.where = [{ createdUser: { phone: ILike(`%${filters.search}%`) } }];
+      }
+
+      // Добавляем фильтры к каждому условию поиска
+      if (filters.role || filters.region) {
+        options.where = (options.where as Array<Record<string, any>>).map((w) => ({
+          ...w,
+          createdUser: {
+            ...w.createdUser,
+            ...(filters.role && { role: filters.role }),
+            ...(filters.region && { region: filters.region }),
+          },
+        }));
+      }
+    } else {
+      // Обычные фильтры без поиска
+      options.where = {};
+      if (filters?.role || filters?.region) {
+        (options.where as any).createdUser = {
+          ...(filters.role && { role: filters.role }),
+          ...(filters.region && { region: filters.region }),
+        };
+      }
+    }
+
+    // Сортировка
+    if (order?.orderBy) {
+      options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+    } else {
+      options.order = { createdAt: 'DESC' };
+    }
+
+    if (take) options.take = take;
+    if (skip) options.skip = skip;
+
     const [data, total] = await this.reportRep.findAndCount(options);
     return {
       data,
