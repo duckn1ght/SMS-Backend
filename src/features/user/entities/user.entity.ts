@@ -7,6 +7,7 @@ import { Report } from 'src/features/report/entities/report.entity';
 import { Appeal } from 'src/features/appeal/entities/appeal.entity';
 import { ActionLog } from 'src/features/action-log/entities/action-log.entity';
 import { SmsBanWord } from 'src/features/sms/entities/sms-ban-word.entity';
+import { Detection } from 'src/features/phone/entities/detection.entity';
 
 @Entity({ name: 'users' })
 export class User extends AbstractEntity<User> {
@@ -72,4 +73,7 @@ export class User extends AbstractEntity<User> {
 
   @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
   fakeId: number;
+
+  @OneToMany(() => Detection, (d) => d.createdUser)
+  detections: Detection[];
 }

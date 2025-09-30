@@ -6,6 +6,7 @@ import { User } from '../user/entities/user.entity';
 import { Whitelist } from '../whitelist/entities/whitelist.entity';
 import { Appeal } from '../appeal/entities/appeal.entity';
 import { Report } from '../report/entities/report.entity';
+import { Detection } from '../phone/entities/detection.entity';
 import { StatisticsGateway } from './statistics.gateway';
 import 'pdfkit-table';
 import ExcelJS from 'exceljs';
@@ -27,64 +28,154 @@ export class StatisticsService {
     private readonly whitelistRepo: Repository<Whitelist>,
     @InjectRepository(Appeal)
     private readonly appealRepo: Repository<Appeal>,
+    @InjectRepository(Detection)
+    private readonly detectionRepo: Repository<Detection>,
     private readonly statisticsGateway: StatisticsGateway,
   ) {}
 
-  async getStatistics() {
-    // 1. Количество обращений по статусам
-    const appealsByStatus = await this.appealRepo
-      .createQueryBuilder('appeal')
-      .select('appeal.status', 'status')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('appeal.status')
-      .getRawMany();
+  async getStatistics(filters?: {
+    startDate?: string;
+    endDate?: string;
+    period?: 'day' | 'week' | 'month' | 'year';
+    region?: string;
+    appealType?: string;
+  }) {
+    // Подготавливаем условия фильтрации
+    const dateConditions = this.buildDateConditions(filters);
+    const regionCondition = filters?.region ? `user.region = :region` : '';
+    const appealTypeCondition = filters?.appealType ? `appeal.type = :appealType` : '';
 
-    // 2. Количество обращений по регионам (по city пользователя)
-    const appealsByRegion = await this.appealRepo
+    // 1. Количество обращений по статусам
+    let appealsByStatusQuery = this.appealRepo
+      .createQueryBuilder('appeal')
+      .leftJoin('appeal.createdUser', 'user')
+      .select('appeal.status', 'status')
+      .addSelect('COUNT(*)', 'count');
+
+    if (dateConditions) {
+      appealsByStatusQuery = appealsByStatusQuery.where(dateConditions);
+    }
+    if (regionCondition) {
+      appealsByStatusQuery = appealsByStatusQuery.andWhere(regionCondition, { region: filters?.region });
+    }
+    if (appealTypeCondition) {
+      appealsByStatusQuery = appealsByStatusQuery.andWhere(appealTypeCondition, { appealType: filters?.appealType });
+    }
+
+    const appealsByStatus = await appealsByStatusQuery.groupBy('appeal.status').getRawMany();
+
+    // 2. Количество обращений по регионам
+    let appealsByRegionQuery = this.appealRepo
       .createQueryBuilder('appeal')
       .leftJoin('appeal.createdUser', 'user')
       .select('user.region', 'region')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('user.region')
-      .getRawMany();
+      .addSelect('COUNT(*)', 'count');
+
+    if (dateConditions) {
+      appealsByRegionQuery = appealsByRegionQuery.where(dateConditions);
+    }
+    if (regionCondition) {
+      appealsByRegionQuery = appealsByRegionQuery.andWhere(regionCondition, { region: filters?.region });
+    }
+    if (appealTypeCondition) {
+      appealsByRegionQuery = appealsByRegionQuery.andWhere(appealTypeCondition, { appealType: filters?.appealType });
+    }
+
+    const appealsByRegion = await appealsByRegionQuery.groupBy('user.region').getRawMany();
 
     // 3. Количество номеров в ЧС/БС по группам пользователей
-    const blacklistByGroup = await this.blacklistRepo
+    let blacklistByGroupQuery = this.blacklistRepo
       .createQueryBuilder('bl')
       .leftJoin('bl.createdUser', 'user')
       .select('user.role', 'role')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('user.role')
-      .getRawMany();
+      .addSelect('COUNT(*)', 'count');
 
-    const whitelistByGroup = await this.whitelistRepo
+    if (dateConditions) {
+      blacklistByGroupQuery = blacklistByGroupQuery.where(dateConditions.replace('appeal.', 'bl.'));
+    }
+    if (regionCondition) {
+      blacklistByGroupQuery = blacklistByGroupQuery.andWhere(regionCondition, { region: filters?.region });
+    }
+
+    const blacklistByGroup = await blacklistByGroupQuery.groupBy('user.role').getRawMany();
+
+    let whitelistByGroupQuery = this.whitelistRepo
       .createQueryBuilder('wl')
       .leftJoin('wl.createdUser', 'user')
       .select('user.role', 'role')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('user.role')
-      .getRawMany();
+      .addSelect('COUNT(*)', 'count');
 
-    // 4. Динамика изменений ЧС/БС за сутки, месяц
-    const blacklistDay = await this.blacklistRepo
-      .createQueryBuilder('bl')
-      .where("bl.createdAt >= NOW() - INTERVAL '1 day'")
-      .getCount();
+    if (dateConditions) {
+      whitelistByGroupQuery = whitelistByGroupQuery.where(dateConditions.replace('appeal.', 'wl.'));
+    }
+    if (regionCondition) {
+      whitelistByGroupQuery = whitelistByGroupQuery.andWhere(regionCondition, { region: filters?.region });
+    }
 
-    const blacklistMonth = await this.blacklistRepo
-      .createQueryBuilder('bl')
-      .where("bl.createdAt >= NOW() - INTERVAL '1 month'")
-      .getCount();
+    const whitelistByGroup = await whitelistByGroupQuery.groupBy('user.role').getRawMany();
 
-    const whitelistDay = await this.whitelistRepo
-      .createQueryBuilder('wl')
-      .where("wl.createdAt >= NOW() - INTERVAL '1 day'")
-      .getCount();
+    // 4. Динамика изменений ЧС/БС с фильтрами
+    let blacklistDayQuery = this.blacklistRepo.createQueryBuilder('bl').leftJoin('bl.createdUser', 'user');
+    let blacklistMonthQuery = this.blacklistRepo.createQueryBuilder('bl').leftJoin('bl.createdUser', 'user');
+    let whitelistDayQuery = this.whitelistRepo.createQueryBuilder('wl').leftJoin('wl.createdUser', 'user');
+    let whitelistMonthQuery = this.whitelistRepo.createQueryBuilder('wl').leftJoin('wl.createdUser', 'user');
 
-    const whitelistMonth = await this.whitelistRepo
-      .createQueryBuilder('wl')
-      .where("wl.createdAt >= NOW() - INTERVAL '1 month'")
-      .getCount();
+    // Применяем базовые временные фильтры или кастомные
+    if (dateConditions) {
+      blacklistDayQuery = blacklistDayQuery.where(dateConditions.replace('appeal.', 'bl.'));
+      blacklistMonthQuery = blacklistMonthQuery.where(dateConditions.replace('appeal.', 'bl.'));
+      whitelistDayQuery = whitelistDayQuery.where(dateConditions.replace('appeal.', 'wl.'));
+      whitelistMonthQuery = whitelistMonthQuery.where(dateConditions.replace('appeal.', 'wl.'));
+    } else {
+      blacklistDayQuery = blacklistDayQuery.where("bl.createdAt >= NOW() - INTERVAL '1 day'");
+      blacklistMonthQuery = blacklistMonthQuery.where("bl.createdAt >= NOW() - INTERVAL '1 month'");
+      whitelistDayQuery = whitelistDayQuery.where("wl.createdAt >= NOW() - INTERVAL '1 day'");
+      whitelistMonthQuery = whitelistMonthQuery.where("wl.createdAt >= NOW() - INTERVAL '1 month'");
+    }
+
+    // Применяем региональный фильтр
+    if (regionCondition) {
+      blacklistDayQuery = blacklistDayQuery.andWhere(regionCondition, { region: filters?.region });
+      blacklistMonthQuery = blacklistMonthQuery.andWhere(regionCondition, { region: filters?.region });
+      whitelistDayQuery = whitelistDayQuery.andWhere(regionCondition, { region: filters?.region });
+      whitelistMonthQuery = whitelistMonthQuery.andWhere(regionCondition, { region: filters?.region });
+    }
+
+    const blacklistDay = await blacklistDayQuery.getCount();
+    const blacklistMonth = await blacklistMonthQuery.getCount();
+    const whitelistDay = await whitelistDayQuery.getCount();
+    const whitelistMonth = await whitelistMonthQuery.getCount();
+
+    // 5. Статистика по обнаружениям
+
+    // Обнаруженные номера с фильтрацией
+    let detectedPhonesQuery = this.detectionRepo
+      .createQueryBuilder('detection')
+      .leftJoin('detection.createdUser', 'user')
+      .where("detection.type = 'phone'");
+
+    // Обнаруженные SMS с фильтрацией
+    let detectedSmsQuery = this.detectionRepo
+      .createQueryBuilder('detection')
+      .leftJoin('detection.createdUser', 'user')
+      .where("detection.type = 'sms'");
+
+    // Применяем фильтры по датам
+    if (dateConditions) {
+      const detectionDateCondition = dateConditions.replace('appeal.', 'detection.');
+      detectedPhonesQuery = detectedPhonesQuery.andWhere(detectionDateCondition);
+      detectedSmsQuery = detectedSmsQuery.andWhere(detectionDateCondition);
+    }
+    // Если фильтров по датам нет, берем все записи без ограничений по времени
+
+    // Применяем фильтр по региону
+    if (regionCondition) {
+      detectedPhonesQuery = detectedPhonesQuery.andWhere(regionCondition, { region: filters?.region });
+      detectedSmsQuery = detectedSmsQuery.andWhere(regionCondition, { region: filters?.region });
+    }
+
+    const detectedPhonesCount = await detectedPhonesQuery.getCount();
+    const detectedSmsCount = await detectedSmsQuery.getCount();
 
     return {
       appealsByStatus,
@@ -95,9 +186,9 @@ export class StatisticsService {
       blacklistMonth,
       whitelistDay,
       whitelistMonth,
+      detectedPhonesCount,
+      detectedSmsCount,
       activeUsers: this.statisticsGateway.activeUsers.size,
-      // maliciousSmsCount,
-      // maliciousCallsCount,
     };
   }
 
@@ -173,6 +264,10 @@ export class StatisticsService {
     doc.text(` ${stats.whitelistDay}`, { align: 'right' });
     doc.font('Cyrillic').fontSize(12).text(`Добавлено номеров в Белый список за месяц:`, { continued: true });
     doc.text(` ${stats.whitelistMonth}`, { align: 'right' });
+    doc.font('Cyrillic').fontSize(12).text(`Обнаруженных вредоносных номеров:`, { continued: true });
+    doc.text(` ${stats.detectedPhonesCount}`, { align: 'right' });
+    doc.font('Cyrillic').fontSize(12).text(`Обнаруженных вредоносных SMS:`, { continued: true });
+    doc.text(` ${stats.detectedSmsCount}`, { align: 'right' });
     doc.font('Cyrillic').fontSize(12).text(`Активных пользователей на момент создания отчета:`, { continued: true });
     doc.text(` ${stats.activeUsers}`, { align: 'right' });
 
@@ -289,6 +384,16 @@ export class StatisticsService {
     sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
     rowIdx++;
 
+    // detections
+    sheet.getCell(`A${rowIdx}`).value = 'Обнаруженных вредоносных номеров';
+    sheet.getCell(`B${rowIdx}`).value = stats.detectedPhonesCount;
+    sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+    rowIdx++;
+    sheet.getCell(`A${rowIdx}`).value = 'Обнаруженных вредоносных SMS';
+    sheet.getCell(`B${rowIdx}`).value = stats.detectedSmsCount;
+    sheet.getCell(`B${rowIdx}`).alignment = { horizontal: 'right' };
+    rowIdx++;
+
     // activeUsers
     sheet.getCell(`A${rowIdx}`).value = 'Активных пользователей на момент создания отчета';
     sheet.getCell(`B${rowIdx}`).value = stats.activeUsers;
@@ -328,6 +433,31 @@ export class StatisticsService {
       case USER_ROLE.MODERATOR:
         return 'Модератор';
     }
+  }
+
+  private buildDateConditions(filters?: {
+    startDate?: string;
+    endDate?: string;
+    period?: 'day' | 'week' | 'month' | 'year';
+  }): string | null {
+    if (filters?.startDate && filters?.endDate) {
+      return `appeal.createdAt BETWEEN '${filters.startDate}' AND '${filters.endDate}'`;
+    }
+
+    if (filters?.period) {
+      switch (filters.period) {
+        case 'day':
+          return "appeal.createdAt >= NOW() - INTERVAL '1 day'";
+        case 'week':
+          return "appeal.createdAt >= NOW() - INTERVAL '1 week'";
+        case 'month':
+          return "appeal.createdAt >= NOW() - INTERVAL '1 month'";
+        case 'year':
+          return "appeal.createdAt >= NOW() - INTERVAL '1 year'";
+      }
+    }
+
+    return null;
   }
 
   #fromAppealStatusToRussianString(status: APPEAL_STATUS): string {

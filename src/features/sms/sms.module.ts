@@ -3,9 +3,11 @@ import { SmsService } from './sms.service';
 import { SmsController } from './sms.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SmsBanWord } from './entities/sms-ban-word.entity';
+import { User } from '../user/entities/user.entity';
+import { Detection } from '../phone/entities/detection.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SmsBanWord])],
+  imports: [TypeOrmModule.forFeature([SmsBanWord, Detection, User])],
   controllers: [SmsController],
   providers: [SmsService],
 })

@@ -1,7 +1,7 @@
-import { Controller, Get, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, UseGuards, Res, Query } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
 import { WebJwtGuard } from '../auth/guards/web.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiQuery } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiTags('Статистика')
@@ -11,8 +11,19 @@ export class StatisticsController {
 
   @Get()
   @UseGuards(WebJwtGuard)
-  getStatistics() {
-    return this.statisticsService.getStatistics();
+  @ApiQuery({ name: 'startDate', required: false, description: 'Начальная дата (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Конечная дата (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'period', required: false, description: 'Период: day, week, month, year' })
+  @ApiQuery({ name: 'region', required: false, description: 'Фильтр по региону' })
+  @ApiQuery({ name: 'appealType', required: false, description: 'Тип обращения' })
+  getStatistics(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('period') period?: 'day' | 'week' | 'month' | 'year',
+    @Query('region') region?: string,
+    @Query('appealType') appealType?: string,
+  ) {
+    return this.statisticsService.getStatistics({ startDate, endDate, period, region, appealType });
   }
 
   @Get('xlsx')
