@@ -1,9 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { ActionLog } from './entities/action-log.entity';
-import { CreateAppealDto } from '../appeal/dto/create-appeal.dto';
 import { CreateLogDto } from './dto/create-log.dto';
 import { CatchErrors } from 'src/const/check.decorator';
 import { ACTION_LOG_SELECT } from 'src/const/selects';
@@ -27,7 +26,7 @@ export class ActionLogService {
 
   @CatchErrors()
   async get(take?: number, skip?: number) {
-    const options: any = { relations: { user: true }, select: ACTION_LOG_SELECT };
+    const options: FindManyOptions<ActionLog> = { relations: { user: true }, select: ACTION_LOG_SELECT };
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
     const [data, total] = await this.logRepo.findAndCount(options);
@@ -45,7 +44,11 @@ export class ActionLogService {
 
   @CatchErrors()
   async getByUserId(userId: string, take?: number, skip?: number) {
-    const options: any = { relations: { user: true }, select: ACTION_LOG_SELECT, where: { user: { id: userId } } };
+    const options: FindManyOptions<ActionLog> = {
+      relations: { user: true },
+      select: ACTION_LOG_SELECT,
+      where: { user: { id: userId } },
+    };
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
     const [data, total] = await this.logRepo.findAndCount(options);

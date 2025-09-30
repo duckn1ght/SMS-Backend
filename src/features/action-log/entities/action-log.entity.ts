@@ -1,5 +1,5 @@
 import { AbstractEntity } from 'src/database/abstract.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ACTION_LOG_TYPE } from '../types/action-log.type';
 import { User } from 'src/features/user/entities/user.entity';
 

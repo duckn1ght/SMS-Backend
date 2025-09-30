@@ -62,4 +62,7 @@ export class Appeal extends AbstractEntity<Appeal> {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
+  fakeId: number;
 }

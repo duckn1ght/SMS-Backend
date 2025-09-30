@@ -8,6 +8,8 @@ import { WebJwtGuard } from '../auth/guards/web.guard';
 import { UniversalJwtGuard } from '../auth/guards/universal.guard';
 import type { JwtReq } from '../auth/types/jwtReq.type';
 import { UpdateAppealDto } from './dto/update-appeal.dto';
+import { APPEAL_STATUS } from './types/appeal.type';
+import { USER_ROLE } from '../user/types/user.types';
 
 @Controller('appeal')
 @ApiTags('Обращения')
@@ -24,16 +26,34 @@ export class AppealController {
 
   @Get()
   @UseGuards(WebJwtGuard)
-  @ApiQuery({
-    name: 'take',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'skip',
-    required: false,
-  })
-  findAll(@Query('skip') skip?: number, @Query('take') take?: number) {
-    return this.appealService.findAll(take, skip);
+  @ApiQuery({ name: 'take', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'status', required: false, default: 'new' })
+  @ApiQuery({ name: 'region', required: false, default: 'Павлодарская область' })
+  @ApiQuery({ name: 'role', required: false, default: 'USER' })
+  @ApiQuery({ name: 'orderBy', required: false, default: 'createdAt' })
+  @ApiQuery({ name: 'orderDir', required: false, default: 'DESC' })
+  findAll(
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+    @Query('status') status?: APPEAL_STATUS,
+    @Query('region') region?: string,
+    @Query('role') role?: USER_ROLE,
+    @Query('orderBy') orderBy?: string,
+    @Query('orderDir') orderDir?: 'ASC' | 'DESC',
+    @Query('fakeId') fakeId?: number,
+  ) {
+    return this.appealService.findAll(
+      take,
+      skip,
+      {
+        status: status, // если нужны строгие типы, можно добавить проверку
+        region,
+        role: role,
+        fakeId,
+      },
+      { orderBy, orderDir },
+    );
   }
 
   @Get('by-id/:id')

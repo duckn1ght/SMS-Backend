@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateAppealDto } from './dto/create-appeal.dto';
 import { ResponseStatusAppealDto } from './dto/response-status-appeal.dto';
 import { Appeal } from './entities/appeal.entity';
@@ -11,6 +11,8 @@ import type { JwtReq } from '../auth/types/jwtReq.type';
 import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
 import { NotificationService } from '../notification/notification.service';
 import { ResponseAppealNotificationText, ResponseAppealNotificationTitle } from 'src/const/notifications';
+import { APPEAL_STATUS } from './types/appeal.type';
+import { USER_ROLE } from '../user/types/user.types';
 
 @Injectable()
 export class AppealService {
@@ -34,10 +36,27 @@ export class AppealService {
     return { statusCode: 201, message: 'Обращение успешно создано' };
   }
 
-  async findAll(take?: number, skip?: number) {
-    const options = {};
-    if (take) Object.assign(options, { take });
-    if (skip) Object.assign(options, { skip });
+  async findAll(
+    take?: number,
+    skip?: number,
+    filters?: { status?: APPEAL_STATUS; region?: string; role?: USER_ROLE; fakeId?: number },
+    order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' },
+  ) {
+    const options: FindManyOptions<Appeal> = {};
+    options.where = {};
+    if (filters?.status) options.where.status = filters.status;
+    if (filters?.fakeId) options.where.fakeId = Number(filters.fakeId);
+    if (filters?.region) options.where.createdUser = { region: filters.region };
+    if (filters?.role) options.where.createdUser = { role: filters.role };
+
+    if (order?.orderBy) {
+      options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+    } else {
+      options.order = { createdAt: 'DESC' };
+    }
+
+    if (take) options.take = take;
+    if (skip) options.skip = skip;
     const [data, total] = await this.appealRepo.findAndCount(options);
     return {
       data,
