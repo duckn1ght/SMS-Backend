@@ -28,6 +28,7 @@ export class AppealController {
   @UseGuards(WebJwtGuard)
   @ApiQuery({ name: 'take', required: false })
   @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'fakeId', required: false })
   @ApiQuery({ name: 'status', required: false, default: 'new' })
   @ApiQuery({ name: 'region', required: false, default: 'Павлодарская область' })
   @ApiQuery({ name: 'role', required: false, default: 'USER' })
