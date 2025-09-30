@@ -18,6 +18,7 @@ export const USER_SELECT: FindOptionsSelect<User> = {
   isActive: true,
   email: true,
   region: true,
+  fakeId: true,
 };
 
 export const BLACKLIST_SELECT: FindOptionsSelect<Blacklist> = {
@@ -28,6 +29,7 @@ export const BLACKLIST_SELECT: FindOptionsSelect<Blacklist> = {
   reports: true,
   status: true,
   createdAt: true,
+  fakeId: true,
   updatedAt: true,
 };
 
@@ -38,6 +40,7 @@ export const WHITELIST_SELECT: FindOptionsSelect<Whitelist> = {
   createdUser: USER_SELECT,
   createdAt: true,
   updatedAt: true,
+  fakeId: true,
 };
 
 export const REPORT_SELECT: FindOptionsSelect<Report> = {
@@ -46,6 +49,7 @@ export const REPORT_SELECT: FindOptionsSelect<Report> = {
   createdUser: USER_SELECT,
   blacklist: BLACKLIST_SELECT,
   createdAt: true,
+  fakeId: true,
   updatedAt: true,
 };
 
