@@ -1,14 +1,7 @@
 import { AbstractEntity } from 'src/database/abstract.entity';
 import { Blacklist } from 'src/features/blacklist/entities/blacklist.entity';
 import { User } from 'src/features/user/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, UpdateDateColumn } from 'typeorm';
 
 @Entity('reports')
 export class Report extends AbstractEntity<Report> {
@@ -28,4 +21,7 @@ export class Report extends AbstractEntity<Report> {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: string;
+
+  @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
+  fakeId: number;
 }

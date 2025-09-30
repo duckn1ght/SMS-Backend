@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Blacklist } from './entities/blacklist.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { BLACKLIST_SELECT } from 'src/const/selects';
 import { CreateBlacklistDto } from './dto/create-blacklist.dto';
 import { User } from '../user/entities/user.entity';
@@ -52,13 +52,41 @@ export class BlacklistService {
   }
 
   @CatchErrors()
-  async get(take?: number, skip?: number) {
-    const options = {
+  async get(
+    take?: number,
+    skip?: number,
+    filters?: { search?: string; role?: string },
+    order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' },
+  ) {
+    const options: FindManyOptions<Blacklist> = {
       relations: { createdUser: true, reports: true },
       select: BLACKLIST_SELECT,
+      where: {} as Partial<Blacklist>,
     };
-    if (take) Object.assign(options, { take });
-    if (skip) Object.assign(options, { skip });
+    // Поиск по номеру или fakeId через search
+    if (filters?.search) {
+      const isNumeric = /^\d+$/.test(filters.search);
+      const isInt32 = isNumeric && Number(filters.search) <= 2147483647;
+      if (isInt32) {
+        options.where = [{ fakeId: Number(filters.search) }, { phone: filters.search }];
+      } else {
+        options.where = [{ phone: filters.search }];
+      }
+    }
+    if (filters?.role) {
+      if (Array.isArray(options.where)) {
+        options.where = options.where.map((w) => ({ ...w, createdUser: { role: filters.role } as User }));
+      } else {
+        (options.where as Partial<Blacklist>).createdUser = { role: filters.role } as User;
+      }
+    }
+    if (order?.orderBy) {
+      options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+    } else {
+      options.order = { createdAt: 'DESC' };
+    }
+    if (take) options.take = take;
+    if (skip) options.skip = skip;
     const [data, total] = await this.blacklistRep.findAndCount(options);
     return {
       data,

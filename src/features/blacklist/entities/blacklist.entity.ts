@@ -1,14 +1,6 @@
 import { AbstractEntity } from 'src/database/abstract.entity';
 import { User } from 'src/features/user/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, UpdateDateColumn } from 'typeorm';
 import type { BLACKLIST_STATUS } from '../types/blacklist.types';
 import { Report } from 'src/features/report/entities/report.entity';
 
@@ -36,4 +28,7 @@ export class Blacklist extends AbstractEntity<Blacklist> {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: string;
+
+  @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
+  fakeId: number;
 }

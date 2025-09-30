@@ -69,4 +69,7 @@ export class User extends AbstractEntity<User> {
 
   @OneToMany(() => SmsBanWord, (s) => s.createdUser)
   createdSmsTemplates: SmsBanWord[];
+
+  @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
+  fakeId: number;
 }

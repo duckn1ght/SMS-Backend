@@ -35,17 +35,22 @@ export class BlacklistController {
   }
 
   @Get()
-  @ApiQuery({
-    name: 'take',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'skip',
-    required: false,
-  })
+  @ApiQuery({ name: 'take', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'search', required: false, description: 'Поиск по номеру или fakeId' })
+  @ApiQuery({ name: 'role', required: false })
+  @ApiQuery({ name: 'orderBy', required: false })
+  @ApiQuery({ name: 'orderDir', required: false })
   @UseGuards(UniversalJwtGuard)
-  async get(@Query('take') take?: number, @Query('skip') skip?: number) {
-    return this.blacklistService.get(take, skip);
+  async get(
+    @Query('take') take?: number,
+    @Query('skip') skip?: number,
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('orderDir') orderDir?: 'ASC' | 'DESC',
+  ) {
+    return this.blacklistService.get(take, skip, { search, role }, { orderBy, orderDir });
   }
 
   @Get('by-phone/:phone')

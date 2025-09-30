@@ -1,12 +1,12 @@
 export enum USER_ROLE {
-    USER = 'USER',
-    PARTNER = 'PARTNER',
-    EXECUTOR = 'EXECUTOR',
-    MODERATOR = 'MODERATOR',
-    ADMIN = 'ADMIN',
+  USER = 'USER',
+  PARTNER = 'PARTNER',
+  EXECUTOR = 'EXECUTOR',
+  MODERATOR = 'MODERATOR',
+  ADMIN = 'ADMIN',
 }
 
 export enum CLIENT_TYPE {
-    ANDROID = 'ANDROID',
-    WEB = 'WEB',
+  ANDROID = 'ANDROID',
+  WEB = 'WEB',
 }

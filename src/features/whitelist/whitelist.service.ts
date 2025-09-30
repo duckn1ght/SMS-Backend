@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Whitelist } from './entities/whitelist.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { WHITELIST_SELECT } from 'src/const/selects';
 import { CreateWhitelistDto } from './dto/create-whitelist.dto';
 import { UpdateWhitelistDto } from './dto/update-whitelist.dto';
@@ -33,13 +33,50 @@ export class WhitelistService {
     return { statusCode: 201, message: 'Номер успешно добавлен в Белый Список' };
   }
 
-  async get(take?: number, skip?: number) {
-    const options = {
+  async get(
+    take?: number,
+    skip?: number,
+    filters?: { search?: string; organization?: string; role?: string },
+    order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' },
+  ) {
+    const options: FindManyOptions<Whitelist> = {
       relations: { createdUser: true },
       select: WHITELIST_SELECT,
+      where: {} as Partial<Whitelist>,
     };
-    if (take) Object.assign(options, { take });
-    if (skip) Object.assign(options, { skip });
+    // Поиск по номеру или fakeId через search
+    if (filters?.search) {
+      // Проверяем, можно ли безопасно привести к integer (Postgres)
+      const isNumeric = /^\d+$/.test(filters.search);
+      // Максимальное значение для int32: 2147483647
+      const isInt32 = isNumeric && Number(filters.search) <= 2147483647;
+      if (isInt32) {
+        options.where = [{ fakeId: Number(filters.search) }, { phone: filters.search }];
+      } else {
+        options.where = [{ phone: filters.search }];
+      }
+    }
+    if (filters?.organization) {
+      if (Array.isArray(options.where)) {
+        options.where = options.where.map((w) => ({ ...w, organization: filters.organization }));
+      } else {
+        (options.where as Partial<Whitelist>).organization = filters.organization;
+      }
+    }
+    if (filters?.role) {
+      if (Array.isArray(options.where)) {
+        options.where = options.where.map((w) => ({ ...w, createdUser: { role: filters.role } as any }));
+      } else {
+        (options.where as Partial<Whitelist>).createdUser = { role: filters.role } as any;
+      }
+    }
+    if (order?.orderBy) {
+      options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+    } else {
+      options.order = { createdAt: 'DESC' };
+    }
+    if (take) options.take = take;
+    if (skip) options.skip = skip;
     const [data, total] = await this.whitelistRep.findAndCount(options);
     return {
       data,

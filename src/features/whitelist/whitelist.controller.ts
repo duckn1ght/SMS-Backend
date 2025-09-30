@@ -35,17 +35,24 @@ export class WhitelistController {
   }
 
   @Get()
+  @ApiQuery({ name: 'take', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'search', required: false, description: 'Поиск по номеру или fakeId' })
+  @ApiQuery({ name: 'organization', required: false })
+  @ApiQuery({ name: 'role', required: false, description: 'ADMIN, USER, PARTNER, EXECUTOR, MODERATOR' })
+  @ApiQuery({ name: 'orderBy', required: false })
+  @ApiQuery({ name: 'orderDir', required: false })
   @UseGuards(UniversalJwtGuard)
-  @ApiQuery({
-    name: 'take',
-    required: false
-  })
-    @ApiQuery({
-    name: 'skip',
-    required: false
-  })
-  async get(@Query('take') take?: number, @Query('skip') skip?: number) {
-    return this.whitelistService.get(take, skip);
+  async get(
+    @Query('take') take?: number,
+    @Query('skip') skip?: number,
+    @Query('search') search?: string,
+    @Query('organization') organization?: string,
+    @Query('role') role?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('orderDir') orderDir?: 'ASC' | 'DESC',
+  ) {
+    return this.whitelistService.get(take, skip, { search, organization, role }, { orderBy, orderDir });
   }
 
   @Get('by-phone/:phone')

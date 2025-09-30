@@ -20,4 +20,7 @@ export class Whitelist extends AbstractEntity<Whitelist> {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: string;
+
+  @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
+  fakeId: number;
 }
