@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Req } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -23,7 +23,7 @@ export class AuthService {
 
   @CatchErrors()
   async auth(dto: AuthDto) {
-    let existedUser;
+    let existedUser: User | null;
     if (dto.clientType === CLIENT_TYPE.ANDROID) {
       existedUser = await this.userRep.findOne({
         where: { phone: dto.phone },
@@ -35,6 +35,7 @@ export class AuthService {
     }
 
     if (existedUser) {
+      if (!existedUser.isActive) throw new HttpException('Пользователь заблокирован', 403);
       const isMatch = await bcrypt.compare(dto.password, existedUser.password);
       if (isMatch) {
         if (existedUser.firebaseToken !== dto.firebaseToken) {
@@ -49,7 +50,7 @@ export class AuthService {
           },
           existedUser.id,
         );
-        return await this.#getJwt(existedUser);
+        return this.#getJwt(existedUser);
       } else {
         throw new HttpException('Неверный пароль', 400);
       }
@@ -80,7 +81,7 @@ export class AuthService {
       },
       newUser.id,
     );
-    return await this.#getJwt(newUser);
+    return this.#getJwt(newUser);
   }
 
   @CatchErrors()
@@ -89,7 +90,7 @@ export class AuthService {
   }
 
   /** Получение JWT токена для указанного User. */
-  async #getJwt(user: User) {
+  #getJwt(user: User) {
     const payload: JwtPayload = {
       id: user.id,
       name: user.name || '',
@@ -99,7 +100,7 @@ export class AuthService {
 
     const { secret, expiresIn } = this.#getJwtConfig(user.clientType);
 
-    return await this.jwtService.sign(payload, { secret, expiresIn });
+    return this.jwtService.sign(payload, { secret, expiresIn });
   }
 
   @CatchErrors()
