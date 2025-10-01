@@ -102,16 +102,19 @@ export class AdminController {
 
   @UseGuards(WebJwtGuard)
   @Get('logs')
-  @ApiQuery({
-    name: 'take',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'skip',
-    required: false,
-  })
-  getLogs(@Query('take') take?: number, @Query('skip') skip?: number) {
-    return this.adminService.getLogs(take, skip);
+  @ApiQuery({ name: 'take', required: false })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Дата от (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Дата до (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'type', required: false, description: 'Тип лога (info, error)' })
+  getLogs(
+    @Query('take') take?: number,
+    @Query('skip') skip?: number,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('type') type?: string,
+  ) {
+    return this.adminService.getLogs(take, skip, { startDate, endDate, type });
   }
 
   @UseGuards(WebJwtGuard)
