@@ -57,6 +57,7 @@ export class AdminService {
       organization: dto.organization || '',
       position: dto.position || '',
       region: dto.city || '',
+      smsConfirmed: true,
     });
     await this.logService.createLog(
       {

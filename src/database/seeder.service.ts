@@ -33,6 +33,7 @@ export class SeederService {
       password: hashedPassword,
       role: USER_ROLE.ADMIN,
       clientType: CLIENT_TYPE.WEB,
+      smsConfirmed: true,
     });
   }
 }

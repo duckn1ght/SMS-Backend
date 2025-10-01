@@ -7,7 +7,7 @@ export class StatisticsGateway {
   @WebSocketServer()
   server: Server;
 
-  public activeUsers = new Set<String>();
+  public activeUsers = new Set<string>();
 
   handleConnection(client: Socket) {
     this.activeUsers.add(client.id);
@@ -15,11 +15,9 @@ export class StatisticsGateway {
     this.server.emit('activeUsers', this.activeUsers.size);
   }
 
-  
   handleDisconnect(client: Socket) {
     this.activeUsers.delete(client.id);
     console.log(`Client disconnected: ${client.id}, total: ${this.activeUsers.size}`);
     this.server.emit('activeUsers', this.activeUsers.size);
   }
 }
-    

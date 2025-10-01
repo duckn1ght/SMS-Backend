@@ -28,8 +28,29 @@ export class StatisticsController {
 
   @Get('xlsx')
   @UseGuards(WebJwtGuard)
-  async getXlsxStatistic(@Res() res) {
-    const buffer = await this.statisticsService.getXlsxStatistics();
+  @ApiQuery({ name: 'startDate', required: false, description: 'Начальная дата (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Конечная дата (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'period', required: false, description: 'Период: day, week, month, year' })
+  @ApiQuery({ name: 'region', required: false, description: 'Фильтр по региону' })
+  @ApiQuery({ name: 'appealStatus', required: false, description: 'Статус обращения' })
+  @ApiQuery({ name: 'appealType', required: false, description: 'Тип обращения' })
+  async getXlsxStatistic(
+    @Res() res,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('period') period?: 'day' | 'week' | 'month' | 'year',
+    @Query('region') region?: string,
+    @Query('appealType') appealType?: string,
+    @Query('appealStatus') appealStatus?: string,
+  ) {
+    const buffer = await this.statisticsService.getXlsxStatistics({
+      startDate,
+      endDate,
+      period,
+      region,
+      appealType,
+      appealStatus,
+    });
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="statistics_${Date.now()}.xlsx"`,
@@ -39,8 +60,29 @@ export class StatisticsController {
 
   @Get('pdf')
   @UseGuards(WebJwtGuard)
-  async getPDFStatistic(@Res() res) {
-    const buffer = await this.statisticsService.getPdfStatistics();
+  @ApiQuery({ name: 'startDate', required: false, description: 'Начальная дата (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Конечная дата (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'period', required: false, description: 'Период: day, week, month, year' })
+  @ApiQuery({ name: 'region', required: false, description: 'Фильтр по региону' })
+  @ApiQuery({ name: 'appealType', required: false, description: 'Тип обращения' })
+  @ApiQuery({ name: 'appealStatus', required: false, description: 'Статус обращения' })
+  async getPDFStatistic(
+    @Res() res,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('period') period?: 'day' | 'week' | 'month' | 'year',
+    @Query('region') region?: string,
+    @Query('appealType') appealType?: string,
+    @Query('appealStatus') appealStatus?: string,
+  ) {
+    const buffer = await this.statisticsService.getPdfStatistics({
+      startDate,
+      endDate,
+      period,
+      region,
+      appealType,
+      appealStatus,
+    });
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="statistics_${Date.now()}.pdf"`,
