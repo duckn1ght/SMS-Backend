@@ -15,5 +15,6 @@ import { ConfigService } from '@nestjs/config';
       }),
     }),
   ],
+  exports: [CacheModule],
 })
 export class RedisModule {}

@@ -11,6 +11,7 @@ import { RegDto } from './dto/reg.dto';
 import { CatchErrors } from 'src/const/check.decorator';
 import { ActionLogService } from '../action-log/action-log.service';
 import { ACTION_LOG_TYPE } from '../action-log/types/action-log.type';
+import { SmsCodeService } from './sms-code.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRep: Repository<User>,
     private logService: ActionLogService,
+    private smsCodeService: SmsCodeService,
   ) {}
 
   @CatchErrors()
@@ -36,6 +38,7 @@ export class AuthService {
 
     if (existedUser) {
       if (!existedUser.isActive) throw new HttpException('Пользователь заблокирован', 403);
+      if (!existedUser.smsConfirmed) throw new HttpException('Номер телефона не подтвержден', 400);
       const isMatch = await bcrypt.compare(dto.password, existedUser.password);
       if (isMatch) {
         if (existedUser.firebaseToken !== dto.firebaseToken) {
@@ -73,6 +76,7 @@ export class AuthService {
       role: USER_ROLE.USER,
       clientType: CLIENT_TYPE.ANDROID,
       firebaseToken: dto.firebaseToken,
+      smsConfirmed: false,
     });
     await this.logService.createLog(
       {
@@ -81,7 +85,32 @@ export class AuthService {
       },
       newUser.id,
     );
-    return this.#getJwt(newUser);
+    const code = await this.smsCodeService.generateAndSaveCode(dto.phone);
+    await this.smsCodeService.sendSms(newUser.phone, code);
+    return {
+      message: 'Пользователь успешно зарегистрирован. На указанный номер отправлен код подтверждения',
+      statusCode: 201,
+    };
+  }
+
+  @CatchErrors()
+  async confirmSms(phone: string, code: string) {
+    const user = await this.userRep.findOne({ where: { phone } });
+    if (!user) throw new HttpException('Пользователь не найден', 404);
+    const isCodeValid = await this.smsCodeService.verifyCode(phone, code);
+    if (!isCodeValid) throw new HttpException('Неверный код', 400);
+    if (!user.smsConfirmed) {
+      user.smsConfirmed = true;
+      await this.userRep.save(user);
+      await this.logService.createLog(
+        {
+          message: `Пользователь ${user.name} подтвердил номер телефона`,
+          type: ACTION_LOG_TYPE.INFO,
+        },
+        user.id,
+      );
+    }
+    return this.#getJwt(user);
   }
 
   @CatchErrors()

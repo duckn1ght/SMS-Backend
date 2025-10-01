@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class RegDto {
   @IsPhoneNumber(undefined, { message: 'Неверный формат номера' })

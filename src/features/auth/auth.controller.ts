@@ -1,10 +1,9 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegDto } from './dto/reg.dto';
 import { AuthDto } from './dto/auth.dto';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import type { JwtReq } from './types/jwtReq.type';
-import { UniversalJwtGuard } from './guards/universal.guard';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ConfirmSmsDto } from './dto/confirm-sms.dto';
 
 @Controller('auth')
 @ApiTags('Авторизация и Регистрация')
@@ -21,6 +20,11 @@ export class AuthController {
   @ApiBody({ type: RegDto })
   async register(@Body() dto: RegDto) {
     return this.authService.registration(dto);
+  }
+
+  @Post('confirm')
+  async confirmSms(@Body() dto: ConfirmSmsDto) {
+    return this.authService.confirmSms(dto.phone, dto.code);
   }
 
   @Get('check/:phone')

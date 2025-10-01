@@ -29,6 +29,9 @@ export class User extends AbstractEntity<User> {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ name: 'sms_confirmed', default: false })
+  smsConfirmed: boolean;
+
   @Column({ nullable: true })
   name?: string;
 
