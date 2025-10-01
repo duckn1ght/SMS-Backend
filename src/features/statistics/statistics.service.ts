@@ -280,8 +280,15 @@ export class StatisticsService {
     };
   }
 
-  async getPdfStatistics() {
-    const stats = await this.getStatistics();
+  async getPdfStatistics(filters?: {
+    startDate?: string;
+    endDate?: string;
+    period?: 'day' | 'week' | 'month' | 'year';
+    region?: string;
+    appealType?: string;
+    appealStatus?: string;
+  }) {
+    const stats = await this.getStatistics(filters);
     const PDFDocument = (await import('pdfkit')).default || (await import('pdfkit'));
     const doc = new PDFDocument({ margin: 40 });
     const buffers: Buffer[] = [];
@@ -397,8 +404,15 @@ export class StatisticsService {
     });
   }
 
-  async getXlsxStatistics() {
-    const stats = await this.getStatistics();
+  async getXlsxStatistics(filters?: {
+    startDate?: string;
+    endDate?: string;
+    period?: 'day' | 'week' | 'month' | 'year';
+    region?: string;
+    appealType?: string;
+    appealStatus?: string;
+  }) {
+    const stats = await this.getStatistics(filters);
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Статистика');
 
