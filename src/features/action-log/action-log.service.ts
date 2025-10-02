@@ -32,10 +32,11 @@ export class ActionLogService {
         (options.where as any).type = filters.type;
       }
       if (filters.search) {
-        // Поиск по fakeId, номеру телефона или email пользователя
+        // Поиск по fakeId, номеру телефона, email или имени пользователя
         const searchConditions: any[] = [
           { user: { phone: ILike(`%${filters.search}%`) } },
           { user: { email: ILike(`%${filters.search}%`) } },
+          { user: { name: ILike(`%${filters.search}%`) } },
         ];
         
         // Если поиск - это число, ищем по fakeId
