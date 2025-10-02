@@ -30,6 +30,7 @@ export class AuthService {
       existedUser = await this.userRep.findOne({
         where: { phone: dto.phone },
       });
+      if (existedUser && !existedUser.smsConfirmed) throw new HttpException('Номер телефона не подтвержден', 400);
     } else {
       existedUser = await this.userRep.findOne({
         where: { email: dto.email },
@@ -38,7 +39,6 @@ export class AuthService {
 
     if (existedUser) {
       if (!existedUser.isActive) throw new HttpException('Пользователь заблокирован', 403);
-      if (!existedUser.smsConfirmed) throw new HttpException('Номер телефона не подтвержден', 400);
       const isMatch = await bcrypt.compare(dto.password, existedUser.password);
       if (isMatch) {
         if (existedUser.firebaseToken !== dto.firebaseToken) {
