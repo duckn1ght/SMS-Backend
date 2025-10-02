@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { FindManyOptions, Repository, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { FindManyOptions, Repository, Between, MoreThanOrEqual, LessThanOrEqual, ILike } from 'typeorm';
 import { ActionLog } from './entities/action-log.entity';
 import { CreateLogDto } from './dto/create-log.dto';
 import { CatchErrors } from 'src/const/check.decorator';
@@ -25,18 +25,62 @@ export class ActionLogService {
   }
 
   @CatchErrors()
-  async get(take?: number, skip?: number, filters?: { startDate?: string; endDate?: string; type?: string }) {
+  async get(take?: number, skip?: number, filters?: { startDate?: string; endDate?: string; type?: string; search?: string }) {
     const options: FindManyOptions<ActionLog> = { relations: { user: true }, select: ACTION_LOG_SELECT, where: {} };
     if (filters) {
       if (filters.type) {
         (options.where as any).type = filters.type;
       }
+      if (filters.search) {
+        // Поиск по fakeId, номеру телефона или email пользователя
+        const searchConditions: any[] = [
+          { user: { phone: ILike(`%${filters.search}%`) } },
+          { user: { email: ILike(`%${filters.search}%`) } },
+        ];
+        
+        // Если поиск - это число, ищем по fakeId
+        const searchAsNumber = parseInt(filters.search);
+        if (!isNaN(searchAsNumber)) {
+          searchConditions.push({ fakeId: searchAsNumber });
+        }
+        
+        options.where = searchConditions;
+        // Добавляем фильтр по типу к каждому условию поиска, если он есть
+        if (filters.type) {
+          options.where = (options.where as any[]).map((w) => ({
+            ...w,
+            type: filters.type,
+          }));
+        }
+      }
       if (filters.startDate && filters.endDate) {
-        (options.where as any).createdAt = Between(new Date(filters.startDate), new Date(filters.endDate));
+        if (!filters.search) {
+          (options.where as any).createdAt = Between(new Date(filters.startDate), new Date(filters.endDate));
+        } else {
+          // Если есть search, добавляем дату к каждому условию поиска
+          options.where = (options.where as any[]).map((w) => ({
+            ...w,
+            createdAt: Between(new Date(filters.startDate!), new Date(filters.endDate!)),
+          }));
+        }
       } else if (filters.startDate) {
-        (options.where as any).createdAt = MoreThanOrEqual(new Date(filters.startDate));
+        if (!filters.search) {
+          (options.where as any).createdAt = MoreThanOrEqual(new Date(filters.startDate));
+        } else {
+          options.where = (options.where as any[]).map((w) => ({
+            ...w,
+            createdAt: MoreThanOrEqual(new Date(filters.startDate!)),
+          }));
+        }
       } else if (filters.endDate) {
-        (options.where as any).createdAt = LessThanOrEqual(new Date(filters.endDate));
+        if (!filters.search) {
+          (options.where as any).createdAt = LessThanOrEqual(new Date(filters.endDate));
+        } else {
+          options.where = (options.where as any[]).map((w) => ({
+            ...w,
+            createdAt: LessThanOrEqual(new Date(filters.endDate!)),
+          }));
+        }
       }
     }
     if (typeof take === 'number') options.take = take;

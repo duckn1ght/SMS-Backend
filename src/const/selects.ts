@@ -59,6 +59,7 @@ export const ACTION_LOG_SELECT: FindOptionsSelect<ActionLog> = {
   type: true,
   user: USER_SELECT,
   createdAt: true,
+  fakeId: true,
 };
 
 export const SMS_TEMPLATE_SELECT: FindOptionsSelect<SmsTemplate> = {

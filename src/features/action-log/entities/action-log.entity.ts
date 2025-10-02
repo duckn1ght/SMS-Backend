@@ -17,4 +17,7 @@ export class ActionLog extends AbstractEntity<ActionLog> {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Column({ name: 'fake_id', type: 'int', generated: 'increment' })
+  fakeId: number;
 }

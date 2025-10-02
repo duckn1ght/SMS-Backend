@@ -107,14 +107,16 @@ export class AdminController {
   @ApiQuery({ name: 'startDate', required: false, description: 'Дата от (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Дата до (YYYY-MM-DD)' })
   @ApiQuery({ name: 'type', required: false, description: 'Тип лога (info, error)' })
+  @ApiQuery({ name: 'search', required: false, description: 'Поиск по fakeId в логе, номеру телефона или email пользователя' })
   getLogs(
     @Query('take') take?: number,
     @Query('skip') skip?: number,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('type') type?: string,
+    @Query('search') search?: string,
   ) {
-    return this.adminService.getLogs(take, skip, { startDate, endDate, type });
+    return this.adminService.getLogs(take, skip, { startDate, endDate, type, search });
   }
 
   @UseGuards(WebJwtGuard)

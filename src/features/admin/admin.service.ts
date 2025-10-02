@@ -220,7 +220,7 @@ export class AdminService {
   }
 
   @CatchErrors()
-  getLogs(take?: number, skip?: number, filters?: { startDate?: string; endDate?: string; type?: string }) {
+  getLogs(take?: number, skip?: number, filters?: { startDate?: string; endDate?: string; type?: string; search?: string }) {
     return this.logService.get(take, skip, filters);
   }
 
