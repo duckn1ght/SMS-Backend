@@ -125,7 +125,7 @@ export class AppealService {
   async response(id: string, dto: ResponseStatusAppealDto, r: JwtReq) {
     const appeal = await this.appealRepo.findOne({ where: { id }, relations: { createdUser: true } });
     if (!appeal) throw new HttpException('Обращение не найдено', 404);
-    await this.appealRepo.update(id, { status: dto.status });
+    await this.appealRepo.update(id, dto);
     await this.logService.createLog(
       { type: ACTION_LOG_TYPE.INFO, message: `Пользователь ${r.user.name} откликнулся обращения` },
       r.user.id,
