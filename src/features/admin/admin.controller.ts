@@ -83,7 +83,7 @@ export class AdminController {
   @Patch('user/:id/unban')
   unbanUser(@Req() r: JwtReq, @Param('id') id: string) {
     if (!(r.user.role === 'ADMIN')) throw new HttpException('Только у админа есть права для этого запроса', 403);
-    return this.adminService.banUser(id);
+    return this.adminService.unbanUser(id);
   }
 
   @UseGuards(WebJwtGuard)
