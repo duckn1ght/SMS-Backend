@@ -4,6 +4,7 @@ import { RegDto } from './dto/reg.dto';
 import { AuthDto } from './dto/auth.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { ConfirmSmsDto } from './dto/confirm-sms.dto';
+import { ResendSmsDto } from './dto/resend-sms.dto';
 
 @Controller('auth')
 @ApiTags('Авторизация и Регистрация')
@@ -25,6 +26,13 @@ export class AuthController {
   @Post('confirm')
   async confirmSms(@Body() dto: ConfirmSmsDto) {
     return this.authService.confirmSms(dto.phone, dto.code);
+  }
+
+  @Post('resend')
+  @HttpCode(200)
+  @ApiBody({ type: ResendSmsDto })
+  async resendSmsCode(@Body() dto: ResendSmsDto) {
+    return this.authService.resendSmsCode(dto.phone);
   }
 
   @Get('check/:phone')

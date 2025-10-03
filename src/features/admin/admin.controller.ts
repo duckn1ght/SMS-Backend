@@ -108,6 +108,8 @@ export class AdminController {
   @ApiQuery({ name: 'endDate', required: false, description: 'Дата до (YYYY-MM-DD)' })
   @ApiQuery({ name: 'type', required: false, description: 'Тип лога (info, error)' })
   @ApiQuery({ name: 'search', required: false, description: 'Поиск по fakeId в логе, номеру телефона или email пользователя' })
+  @ApiQuery({ name: 'orderBy', required: false, description: 'Поле для сортировки (createdAt, type, fakeId, user.name, user.role)' })
+  @ApiQuery({ name: 'orderDir', required: false, description: 'Направление сортировки (ASC, DESC)' })
   getLogs(
     @Query('take') take?: number,
     @Query('skip') skip?: number,
@@ -115,8 +117,10 @@ export class AdminController {
     @Query('endDate') endDate?: string,
     @Query('type') type?: string,
     @Query('search') search?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('orderDir') orderDir?: 'ASC' | 'DESC',
   ) {
-    return this.adminService.getLogs(take, skip, { startDate, endDate, type, search });
+    return this.adminService.getLogs(take, skip, { startDate, endDate, type, search }, { orderBy, orderDir });
   }
 
   @UseGuards(WebJwtGuard)

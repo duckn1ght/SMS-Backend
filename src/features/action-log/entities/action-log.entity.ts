@@ -5,7 +5,7 @@ import { User } from 'src/features/user/entities/user.entity';
 
 @Entity({ name: 'action_logs' })
 export class ActionLog extends AbstractEntity<ActionLog> {
-  @ManyToOne(() => User, (u) => u.logs)
+  @ManyToOne(() => User, (u) => u.logs, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

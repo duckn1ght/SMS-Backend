@@ -25,7 +25,12 @@ export class ActionLogService {
   }
 
   @CatchErrors()
-  async get(take?: number, skip?: number, filters?: { startDate?: string; endDate?: string; type?: string; search?: string }) {
+  async get(
+    take?: number, 
+    skip?: number, 
+    filters?: { startDate?: string; endDate?: string; type?: string; search?: string },
+    order?: { orderBy?: string; orderDir?: 'ASC' | 'DESC' }
+  ) {
     const options: FindManyOptions<ActionLog> = { relations: { user: true }, select: ACTION_LOG_SELECT, where: {} };
     if (filters) {
       if (filters.type) {
@@ -84,6 +89,24 @@ export class ActionLogService {
         }
       }
     }
+
+    // Сортировка
+    if (order?.orderBy) {
+      // Проверяем, является ли поле сортировки вложенным (например user.name)
+      if (order.orderBy.includes('.')) {
+        const [relation, field] = order.orderBy.split('.');
+        if (relation === 'user') {
+          options.order = { user: { [field]: order.orderDir || 'DESC' } };
+        } else {
+          options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+        }
+      } else {
+        options.order = { [order.orderBy]: order.orderDir || 'DESC' };
+      }
+    } else {
+      options.order = { createdAt: 'DESC' };
+    }
+
     if (typeof take === 'number') options.take = take;
     if (typeof skip === 'number') options.skip = skip;
     const [data, total] = await this.logRepo.findAndCount(options);

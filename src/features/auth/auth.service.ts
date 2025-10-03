@@ -138,6 +138,29 @@ export class AuthService {
     return phoneReg ? true : false;
   }
 
+  @CatchErrors()
+  async resendSmsCode(phone: string) {
+    const user = await this.userRep.findOne({ where: { phone } });
+    if (!user) throw new HttpException('Пользователь с таким номером не найден', 404);
+    if (user.smsConfirmed) throw new HttpException('Номер телефона уже подтвержден', 400);
+    
+    const code = await this.smsCodeService.generateAndSaveCode(phone);
+    await this.smsCodeService.sendSms(phone, code);
+    
+    await this.logService.createLog(
+      {
+        message: `Пользователь ${user.name} запросил переотправку СМС кода`,
+        type: ACTION_LOG_TYPE.INFO,
+      },
+      user.id,
+    );
+    
+    return {
+      message: 'Код подтверждения повторно отправлен на указанный номер',
+      statusCode: 200,
+    };
+  }
+
   #getJwtConfig(clientType: CLIENT_TYPE) {
     switch (clientType) {
       case CLIENT_TYPE.WEB:
